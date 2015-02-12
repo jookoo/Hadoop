@@ -25,3 +25,7 @@
 * Java Project + Next
 * Project name: MajoDemo + JavaSE-1.7
 * Finish
+----
+* http://jung.sourceforge.net/
+* jung2-2_0_1.zip
+* D:\jung2-2_0_1
