@@ -8,3 +8,7 @@
 * user.email + xyz@demo.de
 * Add Entry...
 * user.name + bobmin
+* File/Import.../Git/Projects from Git
+* Next
+* Clone URI
+* Next
