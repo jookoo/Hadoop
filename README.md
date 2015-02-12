@@ -48,4 +48,5 @@ MajoDemo - Share
 
 Hadoop MapReduce
 ----
+* https://www.youtube.com/watch?v=VhxWig96dME&list=PLlGrh3fvMCMdihBMYL5_jIX2QsepUzDu2
 * http://java.dzone.com/articles/how-setup-development
