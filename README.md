@@ -1,6 +1,6 @@
 # majo
 
-MajoDemo
+MajoDemo - First
 ----
 * http://www.eclipse.org/egit/
 * Eclipse JUNO Help/Install New Software.../Add...
@@ -37,3 +37,10 @@ JUNG
 * Java/Build Path/User Libraries/New...
 * User library name: JUNG
 * Add External JARs...
+
+MajoDemo - Share
+----
+* Team/Share Project...
+* Git + Next
+* Repository: majo - D:\git\majo\.git
+* Finish
