@@ -45,3 +45,7 @@ MajoDemo - Share
 * Git + Next
 * Repository: majo - D:\git\majo\.git
 * Finish
+
+Hadoop MapReduce
+----
+* http://java.dzone.com/articles/how-setup-development
