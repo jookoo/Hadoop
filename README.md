@@ -22,3 +22,6 @@
 * A new master password... + Yes
 * Question 1 + Question 2 + OK
 * Import using the New Project wizard + Finish
+* Java Project + Next
+* Project name: MajoDemo + JavaSE-1.7
+* Finish
