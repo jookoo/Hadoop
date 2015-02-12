@@ -1,5 +1,7 @@
 # majo
 
+MajoDemo
+----
 * http://www.eclipse.org/egit/
 * Eclipse JUNO Help/Install New Software.../Add...
 * EGit + http://download.eclipse.org/egit/updates
@@ -25,7 +27,13 @@
 * Java Project + Next
 * Project name: MajoDemo + JavaSE-1.7
 * Finish
+
+JUNG
 ----
 * http://jung.sourceforge.net/
 * jung2-2_0_1.zip
 * D:\jung2-2_0_1
+* Window/Preferences/Team/Git/Configuration
+* Java/Build Path/User Libraries/New...
+* User library name: JUNG
+* Add External JARs...
