@@ -12,3 +12,13 @@
 * Next
 * Clone URI
 * Next
+* URI: https://github.com/bobmin/majo.git
+* User: xyz@demo.de
+* Password: #####
+* Store in Secure Store
+* Next, Next
+* Directory: D:\git\majo
+* Next
+* A new master password... + Yes
+* Question 1 + Question 2 + OK
+* Import using the New Project wizard + Finish
