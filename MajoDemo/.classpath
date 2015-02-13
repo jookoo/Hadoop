@@ -3,5 +3,18 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/JUNG"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Apache Commons Net"/>
+	<classpathentry kind="lib" path="C:/Entwicklung/Ressourcen/commons-net-3.0.1/commons-net-3.0.1.jar"/>
+	<classpathentry kind="lib" path="C:/Entwicklung/Ressourcen/commons-logging-1.1.1/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="C:/Entwicklung/Ressourcen/commons-collections-3.2.1/commons-collections-3.2.1.jar"/>
+	<classpathentry kind="lib" path="C:/Entwicklung/Ressourcen/commons-codec-1.8/commons-codec-1.8.jar"/>
+	<classpathentry kind="lib" path="D:/hadoop/commons-configuration-1.10.jar"/>
+	<classpathentry kind="lib" path="D:/hadoop/commons-lang-2.6.jar"/>
+	<classpathentry kind="lib" path="D:/hadoop/guava-18.0.jar"/>
+	<classpathentry kind="lib" path="D:/hadoop/hadoop-auth-2.6.0.jar"/>
+	<classpathentry kind="lib" path="D:/hadoop/hadoop-common-0.21.0.jar"/>
+	<classpathentry kind="lib" path="D:/hadoop/hadoop-common-2.6.0.jar"/>
+	<classpathentry kind="lib" path="D:/hadoop/hadoop-mapreduce-client-core-2.6.0.jar"/>
+	<classpathentry kind="lib" path="D:/hadoop/log4j-1.2.17.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
