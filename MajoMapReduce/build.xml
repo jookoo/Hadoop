@@ -1,0 +1,46 @@
+<project name="MajoMapReduce" basedir="." default="main">
+
+	<property name="hadoop.dir" value="C:/Entwicklung/Ressourcen/hadoop-2.6" />
+
+	<property name="src.dir" value="src" />
+	<property name="build.dir" value="build" />
+	<property name="classes.dir" value="${build.dir}/classes" />
+	<property name="jar.dir" value="${build.dir}/jar" />
+
+	<path id="classpath">
+		<fileset dir="${hadoop.dir}" includes="**/*.jar" />
+	</path>
+
+	<property name="main-class-wordcount" value="majo.mapreduce.WordCount" />
+
+	<target name="clean">
+		<delete dir="${build.dir}" />
+	</target>
+
+	<target name="compile">
+		<mkdir dir="${classes.dir}" />
+		<javac srcdir="${src.dir}" destdir="${classes.dir}" 
+				classpathref="classpath"
+				includeantruntime="false" />
+	</target>
+
+	<target name="jar-wordcount" depends="compile">
+		<mkdir dir="${jar.dir}" />
+		<jar destfile="${jar.dir}/WordCount.jar" basedir="${classes.dir}">
+			<manifest>
+				<attribute name="Main-Class" value="${main-class-wordcount}" />
+			</manifest>
+		</jar>
+	</target>
+	
+	<!-- run shell script <target name="run" depends="jar"> <exec executable="sh"> 
+		<arg value="runner-wordcount.sh"/> </exec> </target> -->
+
+	<target name="run" depends="jar-wordcount">
+		<echo message="Projekt-JAR erzeugt. Verteilung starten!" />
+	</target>
+
+	<target name="clean-build" depends="clean,jar-wordcount" />
+	<target name="main" depends="clean,run" />
+
+</project>
