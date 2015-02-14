@@ -1,4 +1,4 @@
-package majo.demo;
+package majo.mapreduce;
 
 import java.io.IOException;
 import java.util.Iterator;
