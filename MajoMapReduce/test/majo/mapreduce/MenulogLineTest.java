@@ -33,7 +33,6 @@ public class MenulogLineTest {
 	public void testMenulogLine() {
 		final MenulogLine x = new MenulogLine(LINE);
 		System.out.println(x);
-		System.out.println(CAL);
 		assertEquals(CAL, x.getDateTime());
 		assertEquals("21", x.getUser());
 	}
