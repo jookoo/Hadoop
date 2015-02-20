@@ -15,7 +15,9 @@ import org.junit.Test;
  */
 public class MenulogLineTest {
 	
-	private static final String LINE = "20150214;09:02:22;21;C:\\PATH\\XYZ.EXE;;Eine Auswahl;ABC->DEF";
+	private static final String LINE1 = "20150214;09:02:22;21;C:\\PATH\\XYZ.EXE;;Eine Auswahl;ABC->DEF";
+	
+	private static final String LINE2 = "20150214;09:02:22;21;;;Eine Auswahl;ABC->DEF";
 	
 	private static final Calendar CAL = GregorianCalendar.getInstance();
 	
@@ -29,12 +31,32 @@ public class MenulogLineTest {
 		CAL.set(Calendar.MILLISECOND, 0);
 	}
 	
+	@Test (expected = NullPointerException.class)
+	public void testNullPointerException() {
+		new MenulogLine(null);
+	}
+	
+	@Test (expected = IllegalArgumentException.class)
+	public void testIllegalArgumentException() {
+		new MenulogLine(";;;");
+	}
+	
 	@Test
-	public void testMenulogLine() {
-		final MenulogLine x = new MenulogLine(LINE);
+	public void testMenulogLine1() {
+		final MenulogLine x = new MenulogLine(LINE1);
 		System.out.println(x);
 		assertEquals(CAL, x.getDateTime());
 		assertEquals("21", x.getUser());
+		assertEquals("Eine Auswahl", x.getValue());
 	}
 
+	@Test
+	public void testMenulogLine2() {
+		final MenulogLine x = new MenulogLine(LINE2);
+		System.out.println(x);
+		assertEquals(CAL, x.getDateTime());
+		assertEquals("21", x.getUser());
+		assertEquals("Eine Auswahl", x.getValue());
+	}
+	
 }

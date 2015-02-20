@@ -11,7 +11,7 @@
 		<fileset dir="${hadoop.dir}" includes="**/*.jar" />
 	</path>
 
-	<property name="main-class-wordcount" value="majo.mapreduce.WordCount" />
+	<property name="main-class-wordcount" value="majo.mapreduce.MenulogUserCount" />
 
 	<target name="clean">
 		<delete dir="${build.dir}" />
@@ -26,7 +26,7 @@
 
 	<target name="jar-wordcount" depends="compile">
 		<mkdir dir="${jar.dir}" />
-		<jar destfile="${jar.dir}/WordCount.jar" basedir="${classes.dir}">
+		<jar destfile="${jar.dir}/Majo.jar" basedir="${classes.dir}">
 			<manifest>
 				<attribute name="Main-Class" value="${main-class-wordcount}" />
 			</manifest>

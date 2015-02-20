@@ -1,12 +1,13 @@
 package majo.mapreduce;
 
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 /**
  * Beschreibt eine Zeile der Menulog-Dateien.
@@ -18,7 +19,7 @@ import java.util.StringTokenizer;
  */
 public class MenulogLine {
 	
-	private static final int INDEX_MAX = 6;
+	private static final int INDEX_MAX = 7;
 
 	/** Tag/Uhrzeit der Aktion */
 	private final Calendar date;
@@ -41,12 +42,9 @@ public class MenulogLine {
 	 */
 	public MenulogLine(final String line) {
 		Objects.requireNonNull(line);
-		final StringTokenizer st = new StringTokenizer(line, ";");
-		final String[] tokens = new String[st.countTokens()];
-		int index = 0;
-		while (st.hasMoreTokens()) {
-			tokens[index] = st.nextToken();
-			index++;
+		final String[] tokens = line.split(";");
+		if (tokens.length != INDEX_MAX) {
+			throw new IllegalArgumentException("[tokens.length] != " + INDEX_MAX);
 		}
 		this.date = createDate(tokens[0], tokens[1]);
 		this.user = tokens[2];
@@ -80,10 +78,16 @@ public class MenulogLine {
 	public String toString() {
 		final StringBuffer sb = new StringBuffer();
 		sb.append(MenulogLine.class.getName()).append(" [");
-		sb.append("date = ").append(date).append(", ");
+		final DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+		sb.append("date = ").append(df.format(date.getTime())).append(", ");
 		sb.append("user = ").append(user).append(", ");
+		sb.append("value = ").append(value);
 		sb.append("]");
 		return sb.toString();
+	}
+
+	public String getValue() {
+		return value;
 	}
 	
 }
