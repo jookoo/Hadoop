@@ -74,12 +74,17 @@ public class MenulogLine {
 		return user;
 	}
 
+	public File getProgram() {
+		return program;
+	}
+	
 	@Override
 	public String toString() {
 		final StringBuffer sb = new StringBuffer();
 		sb.append(MenulogLine.class.getName()).append(" [");
 		final DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 		sb.append("date = ").append(df.format(date.getTime())).append(", ");
+		sb.append("program = ").append(program.getAbsolutePath()).append(", ");
 		sb.append("user = ").append(user).append(", ");
 		sb.append("value = ").append(value);
 		sb.append("]");
@@ -89,5 +94,5 @@ public class MenulogLine {
 	public String getValue() {
 		return value;
 	}
-	
+
 }

@@ -25,15 +25,12 @@ public class MenulogUserCount {
 		public void map(
 				final Object key, final Text value, final Context context) 
 						throws IOException, InterruptedException {
-			
-//			StringTokenizer itr = new StringTokenizer(value.toString());
-//			while (itr.hasMoreTokens()) {
-//				word.set(itr.nextToken());
-//				context.write(word, one);
-//			}
-			
 			final MenulogLine line = new MenulogLine(value.toString());
-			word.set(line.getUser());
+			// Benutzer
+			word.set("USER[" + line.getUser() + "]");
+			context.write(word, one);
+			// Auswahl
+			word.set("VALUE[" + line.getProgram().getName() + "~" + line.getValue() + "]");
 			context.write(word, one);
 		}
 		

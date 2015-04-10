@@ -3,7 +3,7 @@
 	<property name="hadoop.dir" value="C:/Entwicklung/Ressourcen/hadoop-2.6" />
 
 	<property name="src.dir" value="src" />
-	<property name="build.dir" value="build" />
+	<property name="build.dir" value="D:/Downloads/hadoop-2.6/build" />
 	<property name="classes.dir" value="${build.dir}/classes" />
 	<property name="jar.dir" value="${build.dir}/jar" />
 
@@ -11,7 +11,7 @@
 		<fileset dir="${hadoop.dir}" includes="**/*.jar" />
 	</path>
 
-	<property name="main-class-wordcount" value="majo.mapreduce.MenulogUserCount" />
+	<property name="main-class-wordcount" value="majo.mapreduce.MenulogSessionCount" />
 
 	<target name="clean">
 		<delete dir="${build.dir}" />
