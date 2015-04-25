@@ -3,7 +3,10 @@ package majo.mapreduce;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import org.apache.hadoop.io.Writable;
@@ -16,6 +19,9 @@ import org.apache.hadoop.io.WritableComparable;
  *
  */
 public class UserSession implements Writable, WritableComparable<UserSession> {
+	
+	private static final SimpleDateFormat DATE_FORMAT = 
+			new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 	
 	/** Benutzername für Session */
 	private String username = "???";
@@ -96,23 +102,22 @@ public class UserSession implements Writable, WritableComparable<UserSession> {
 
 	@Override
 	public String toString() {
-		final StringBuffer sb = new StringBuffer(username).append(" ");
-		for (Long x: menues.keySet()) {
+		final StringBuffer sb = new StringBuffer(DATE_FORMAT.format(new Date(getFirstTime()))).append(" ");
+		for (Entry<Long, String> x: menues.entrySet()) {
 			sb.append("[");
-			sb.append(x.longValue());
+			sb.append(x.getKey().longValue());
 			sb.append(":");
-			final String value = menues.get(x);
-			sb.append(value.replaceAll("[\\.:]+", ""));
+			sb.append(x.getValue().replaceAll("[\\.:]+", ""));
 			sb.append("]");
 		}
 		return sb.toString();
 	}
 
 	@Override
-	public int compareTo(final UserSession o) {
-		int x = username.compareTo(o.username);
+	public int compareTo(final UserSession other) {
+		int x = username.compareTo(other.username);
 		if (0 == x) {
-			x = menues.firstKey().compareTo(Long.valueOf(o.getFirstTime()));
+			x = Long.compare(getFirstTime(), other.getFirstTime());
 		}
 		return x;
 	}
