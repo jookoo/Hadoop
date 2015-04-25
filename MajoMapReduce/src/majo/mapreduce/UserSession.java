@@ -20,7 +20,7 @@ public class UserSession implements Writable {
 	private String username = "???";
 	
 	/** Einträge der Sitzung; Sortierung entspricht Zeitschlüssel */
-	private Map<Long, String> menues = new TreeMap<>();
+	private TreeMap<Long, String> menues = new TreeMap<>();
 
 	/**
 	 * Parameterloser Konstruktor für {@link Writable}.
@@ -55,6 +55,22 @@ public class UserSession implements Writable {
 		return menues;
 	}
 
+	/**
+	 * Liefert den ersten Zeitpunkt der Sitzung.
+	 * @return eine Zahl
+	 */
+	public long getFirstTime() {
+		return menues.firstKey().longValue();
+	}
+
+	/**
+	 * Liefert den letzten Zeitpunkt der Sitzung.
+	 * @return eine Zahl
+	 */
+	public long getLastTime() {
+		return menues.lastKey().longValue();
+	}
+	
 	@Override
 	public void write(final DataOutput out) throws IOException {
 		out.writeUTF(username);
