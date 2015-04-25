@@ -2,16 +2,17 @@
 
 	<property name="hadoop.dir" value="C:/Entwicklung/Ressourcen/hadoop-2.6" />
 
-	<property name="src.dir" value="src" />
-	<property name="build.dir" value="D:/Downloads/hadoop-2.6/build" />
-	<property name="classes.dir" value="${build.dir}/classes" />
-	<property name="jar.dir" value="${build.dir}/jar" />
-
 	<path id="classpath">
 		<fileset dir="${hadoop.dir}" includes="**/*.jar" />
 	</path>
 
-	<property name="main-class-wordcount" value="majo.mapreduce.MenulogSessionCount" />
+	<property name="main-class-majo" value="majo.mapreduce.MenulogSessionCount" />
+
+	<property name="src.dir" value="src" />
+
+	<property name="build.dir"   value="D:/Downloads/hadoop-2.6/build" />
+	<property name="classes.dir" value="${build.dir}/classes" />
+	<property name="jar.dir"     value="${build.dir}/jar" />
 
 	<target name="clean">
 		<delete dir="${build.dir}" />
@@ -24,23 +25,23 @@
 				includeantruntime="false" />
 	</target>
 
-	<target name="jar-wordcount" depends="compile">
+	<target name="jar-majo" depends="compile">
 		<mkdir dir="${jar.dir}" />
 		<jar destfile="${jar.dir}/Majo.jar" basedir="${classes.dir}">
 			<manifest>
-				<attribute name="Main-Class" value="${main-class-wordcount}" />
+				<attribute name="Main-Class" value="${main-class-majo}" />
 			</manifest>
 		</jar>
 	</target>
 	
 	<!-- run shell script <target name="run" depends="jar"> <exec executable="sh"> 
-		<arg value="runner-wordcount.sh"/> </exec> </target> -->
+		<arg value="runner-majo.sh"/> </exec> </target> -->
 
-	<target name="run" depends="jar-wordcount">
-		<echo message="Projekt-JAR erzeugt. Verteilung starten!" />
+	<target name="run" depends="jar-majo">
+		<echo message="Projekt-JAR erzeugt: ${jar.dir}" />
 	</target>
 
-	<target name="clean-build" depends="clean,jar-wordcount" />
+	<target name="clean-build" depends="clean,jar-majo" />
 	<target name="main" depends="clean,run" />
 
 </project>

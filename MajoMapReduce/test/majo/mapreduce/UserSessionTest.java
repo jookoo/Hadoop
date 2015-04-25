@@ -5,7 +5,7 @@ import org.junit.Test;
 /**
  * Prüft die Klasse {@link UserSession}.
  * 
- * @author maik.boettcher@bur-kg.de
+ * @author majo
  *
  */
 public class UserSessionTest {
@@ -21,7 +21,7 @@ public class UserSessionTest {
 			if (null == session) {
 				session = new UserSession(user, time, menue);
 			} else {
-				session.add(time, menue);
+				session.getMenues().put(time, menue);
 			}
 		}
 		System.out.println(session);
