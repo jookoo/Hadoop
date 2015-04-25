@@ -8,9 +8,7 @@ import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.MapWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -179,22 +177,4 @@ public class MenulogSessionCount {
 
 	}
 	
-	public static class SessionValues extends MapWritable {
-		
-		@Override
-		public String toString() {
-			final StringBuffer sb = new StringBuffer();
-			Set<Writable> keys = this.keySet();
-			for (Writable i: keys) {
-				sb.append("{");
-				sb.append(i.toString());
-				sb.append(":");
-				sb.append(this.get(i).toString());
-				sb.append("}");
-			}
-			return sb.toString();
-		}
-		
-	}
-
 }

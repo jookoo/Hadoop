@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.io.WritableComparable;
 
 /**
  * Beschreibt eine Benutzersitzung.
@@ -14,7 +15,7 @@ import org.apache.hadoop.io.Writable;
  * @author majo
  *
  */
-public class UserSession implements Writable {
+public class UserSession implements Writable, WritableComparable<UserSession> {
 	
 	/** Benutzername für Session */
 	private String username = "???";
@@ -105,6 +106,15 @@ public class UserSession implements Writable {
 			sb.append("]");
 		}
 		return sb.toString();
+	}
+
+	@Override
+	public int compareTo(final UserSession o) {
+		int x = username.compareTo(o.username);
+		if (0 == x) {
+			x = menues.firstKey().compareTo(Long.valueOf(o.getFirstTime()));
+		}
+		return x;
 	}
 
 }
