@@ -21,6 +21,12 @@ public class UserSession implements Writable {
 	
 	/** Einträge der Sitzung; Sortierung entspricht Zeitschlüssel */
 	private Map<Long, String> menues = new TreeMap<>();
+
+	/**
+	 * Parameterloser Konstruktor für {@link Writable}.
+	 */
+	public UserSession() {
+	}
 	
 	/**
 	 * Instanziiert eine Session für den Benutzernamen {@code username} und

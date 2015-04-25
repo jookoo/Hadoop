@@ -137,10 +137,21 @@ public class MenulogSessionCount {
 				LongWritable longWritable = (LongWritable) x;
 				keys.add(Long.valueOf(longWritable.get()));
 			}
-			final long first = keys.first() - MAX;
-			final long last = keys.last() + MAX;
-			if (first <= time.longValue() && time.longValue() <= last) {
+			if (0 == keys.size()) {
 				success = true;
+			} else if (1 == keys.size()) {
+				final long x = keys.first();
+				final long first = x - MAX;
+				final long last = x + MAX;
+				if (first <= time.longValue() && time.longValue() <= last) {
+					success = true;
+				}				
+			} else {
+				final long first = keys.first() - MAX;
+				final long last = keys.last() + MAX;
+				if (first <= time.longValue() && time.longValue() <= last) {
+					success = true;
+				}
 			}
 			return success;
 		}
