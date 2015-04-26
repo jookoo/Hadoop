@@ -6,7 +6,7 @@ import java.util.Comparator;
  * Vergleicht zwei {@link MenulogLine} und sortiert nach Datum/Zeit der 
  * Eintragung.
  * 
- * @author maik.boettcher@bur-kg.de
+ * @author majo
  *
  */
 public class MenulogLineComparator implements Comparator<MenulogLine> {

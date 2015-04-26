@@ -12,7 +12,7 @@ import org.junit.Test;
 /**
  * Prüft die Klasse {@link MenulogLineComparator}.
  * 
- * @author maik.boettcher@bur-kg.de
+ * @author majo
  *
  */
 public class MenulogLineComparatorTest {

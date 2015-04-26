@@ -7,7 +7,7 @@ import org.junit.Test;
 /**
  * Prüft die Klasse {@link MenulogSessionCount}.
  * 
- * @author maik.boettcher@bur-kg.de
+ * @author majo
  *
  */
 public class MenulogSessionCountTest {
