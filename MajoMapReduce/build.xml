@@ -6,7 +6,7 @@
 		<fileset dir="${hadoop.dir}" includes="**/*.jar" />
 	</path>
 
-	<property name="main-class-majo" value="majo.mapreduce.MenulogSessionCount" />
+	<property name="main-class-majo" value="majo.mapreduce.Main" />
 
 	<property name="src.dir" value="src" />
 

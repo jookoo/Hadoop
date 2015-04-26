@@ -10,13 +10,9 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 /**
  * Ananlyse der Benutzersitzungen.
@@ -24,7 +20,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
  * @author majo
  *
  */
-public class MenulogSessionCount {
+public class UserSessionJob {
 	
 	/**
 	 * Beschreibung für verschiedene Zähler im Job.
@@ -34,47 +30,6 @@ public class MenulogSessionCount {
 		  OTHER_USERNAME_LINE,
 		  OTHER_DATETIME_LINE,
 		  MATCH_LINE
-	}
-
-	private static final String MENULOG_FILTER_USERNAME = "menulog.filter.username";
-	
-	private static final String MENULOG_MINUTES_MAX = "menulog.minutes.max";
-
-	/**
-	 * Konfiguration und Starter für den Job.
-	 * @param args
-	 * @throws Exception
-	 */
-	public static void main(final String[] args) throws Exception {
-		// Konfiguration
-		Configuration conf = new Configuration();
-		conf.set(MENULOG_FILTER_USERNAME, "22");
-		conf.setInt(MENULOG_MINUTES_MAX, 30);
-
-		// Job anlegen
-		final Job job = Job.getInstance(conf, 
-				MenulogSessionCount.class.getSimpleName());
-		job.setJarByClass(MenulogSessionCount.class);
-		
-		// Mappper + Combiner + Reducer
-		job.setMapperClass(UserValueMapper.class);
-		job.setCombinerClass(SessionReducer.class);
-		job.setReducerClass(SessionReducer.class);
-		
-		// Output
-		job.setOutputKeyClass(Text.class);
-		job.setOutputValueClass(UserSession.class);
-		
-		// Mapper-Output
-		job.setMapOutputKeyClass(Text.class);
-		job.setMapOutputValueClass(UserSession.class);
-		
-		// Input- und Output-Pfad
-		FileInputFormat.addInputPath(job, new Path(args[0]));
-		FileOutputFormat.setOutputPath(job, new Path(args[1]));
-		
-		// Ausführung abwarten
-		System.exit(job.waitForCompletion(true) ? 0 : 1);
 	}
 
 	/**
@@ -96,7 +51,7 @@ public class MenulogSessionCount {
 				final Object key, final Text value, final Context context) 
 						throws IOException, InterruptedException {
 			final Configuration conf = context.getConfiguration();
-			final String filterUser = conf.get(MENULOG_FILTER_USERNAME);
+			final String filterUser = conf.get(Main.MENULOG_FILTER_USERNAME);
 			
 			final MenulogLine line = new MenulogLine(value.toString());
 			final String prg = line.getProgram().getName();
@@ -181,7 +136,7 @@ public class MenulogSessionCount {
 
 			// Konfiguration
 			final Configuration conf = context.getConfiguration();
-			final int minutes = conf.getInt(MENULOG_MINUTES_MAX, 30);
+			final int minutes = conf.getInt(Main.MENULOG_MINUTES_MAX, 30);
 			delay = (minutes * FACTOR);
 
 			monitor.println("username = " + key.toString() + ", delay = " + delay);

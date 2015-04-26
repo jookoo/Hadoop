@@ -5,12 +5,12 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 /**
- * Prüft die Klasse {@link MenulogSessionCount}.
+ * Prüft die Klasse {@link UserSessionJob}.
  * 
  * @author majo
  *
  */
-public class MenulogSessionCountTest {
+public class UserSessionJobTest {
 
 	@Test
 	public void testFilterPrg() {
@@ -22,8 +22,8 @@ public class MenulogSessionCountTest {
 				{"R:\\XPRG\\VOLLNEU\\AU\\AUWINXYZ.EXE", Boolean.FALSE},
 				{"R:\\XPRG\\VOLLNEU\\BUCHPRG\\BUCH.EXE", Boolean.FALSE},
 		};
-		final MenulogSessionCount.UserValueMapper main = 
-				new MenulogSessionCount.UserValueMapper(); 
+		final UserSessionJob.UserValueMapper main = 
+				new UserSessionJob.UserValueMapper(); 
 		for (Object[] x: data) {
 			final String prg = (String) x[0];
 			final boolean check = (boolean) x[1];
