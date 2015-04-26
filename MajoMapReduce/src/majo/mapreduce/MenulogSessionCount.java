@@ -150,10 +150,15 @@ public class MenulogSessionCount {
 		private final Monitor monitor = new Monitor(false);
 		
 		/** die Startseiten */
-		private static final Set<String> STARTPAGES = new HashSet<>();
-		
+		private static final Set<String> STARTPAGES = new HashSet<>();	
 		static {
 			STARTPAGES.add("2. Auskunft");
+		}
+		
+		/** die Abschlussseiten */
+		private static final Set<String> ENDPAGES = new HashSet<>();	
+		static {
+			ENDPAGES.add("Z. Programm beenden");
 		}
 		
 		/** 
@@ -186,32 +191,33 @@ public class MenulogSessionCount {
 			for (UserSession x: values) {
 				final Map<Long, String> menues = x.getMenues();
 				monitor.println("\tmenues: first = " + x.getFirstTime() + ", size = " + menues.size());
-		
 				for (Entry<Long, String> e: menues.entrySet()) {
 					// aktuelle Wert: Zeit + Menüpunkt
 					final long time = e.getKey().longValue();
 					final String menue = e.getValue();
-					if (cache.isEmpty()) {
-						// neue Sitzung beginnen
-						cache.put(Long.valueOf(time), menue);
-						monitor.println("\t\tinit");
-					} else {
-						if (checkMinMaxTime(
-								cache.firstKey().longValue(), 
-								cache.lastKey().longValue(), 
-								time)) {
-							// gehört mit zur akt. Sitzung
+					if (!ENDPAGES.contains(menue)) {
+						if (cache.isEmpty()) {
+							// neue Sitzung beginnen
 							cache.put(Long.valueOf(time), menue);
-							monitor.println("\t\tcache: " + time + " >> " + cache.size());
+							monitor.println("\t\tinit");
 						} else {
-							// akt. Sitzung übernehmen (akt. Wert gehört nicht dazu)
-							final UserSession newSession = new UserSession();
-							newSession.getMenues().putAll(cache);
-							sessions.add(newSession);
-							monitor.println("\t\tcreate: " + newSession.getFirstTime() + ", size = " + newSession.getMenues().size());
-							cache.clear();
-							// neue Sitzung beginnen (mit Wert, der nicht dazu gehört)
-							cache.put(Long.valueOf(time), menue);
+							if ((!STARTPAGES.contains(menue)) && checkMinMaxTime(
+									cache.firstKey().longValue(), 
+									cache.lastKey().longValue(), 
+									time)) {
+								// gehört mit zur akt. Sitzung
+								cache.put(Long.valueOf(time), menue);
+								monitor.println("\t\tcache: " + time + " >> " + cache.size());
+							} else {
+								// akt. Sitzung übernehmen (akt. Wert gehört nicht dazu)
+								final UserSession newSession = new UserSession();
+								newSession.getMenues().putAll(cache);
+								sessions.add(newSession);
+								monitor.println("\t\tcreate: " + newSession.getFirstTime() + ", size = " + newSession.getMenues().size());
+								cache.clear();
+								// neue Sitzung beginnen (mit Wert, der nicht dazu gehört)
+								cache.put(Long.valueOf(time), menue);
+							}
 						}
 					}
 				}
