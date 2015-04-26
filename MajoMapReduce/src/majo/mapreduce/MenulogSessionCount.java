@@ -146,6 +146,9 @@ public class MenulogSessionCount {
 	public static class SessionReducer 
 	extends Reducer<Text, UserSession, Text, UserSession> {
 
+		/** eine Ausgabe zur Fehlersuche */
+		private final Monitor monitor = new Monitor(false);
+		
 		/** die Startseiten */
 		private static final Set<String> STARTPAGES = new HashSet<>();
 		
@@ -176,30 +179,34 @@ public class MenulogSessionCount {
 			final int minutes = conf.getInt(MENULOG_MINUTES_MAX, 30);
 			delay = (minutes * FACTOR);
 
-			System.out.println("username = " + key.toString() + ", delay = " + delay);
+			monitor.println("username = " + key.toString() + ", delay = " + delay);
 			
 			// Sitzungen ermitteln
 			int count = 0;
 			for (UserSession x: values) {
 				final Map<Long, String> menues = x.getMenues();
-				System.out.println("\tfirst = " + x.getFirstTime() + ", size = " + menues.size());
+				monitor.println("\tmenues: first = " + x.getFirstTime() + ", size = " + menues.size());
+		
 				for (Entry<Long, String> e: menues.entrySet()) {
 					final long time = e.getKey().longValue();
 					final String menue = e.getValue();
+				
 					if (cache.isEmpty()) {
 						cache.put(Long.valueOf(time), menue);
-						System.out.println("\t\tinit");
+						monitor.println("\t\tinit");
 					} else {
 						if (checkMinMaxTime(
-								cache.firstKey().longValue(), cache.lastKey().longValue(), 
+								cache.firstKey().longValue(), 
+								cache.lastKey().longValue(), 
 								time)) {
 							cache.put(Long.valueOf(time), menue);
-							System.out.println("\t\tcache: " + time + " >> " + cache.size());
+							monitor.println("\t\tcache: " + time + " >> " + cache.size());
 						} else {
 							final UserSession newSession = new UserSession();
 							newSession.getMenues().putAll(cache);
 							sessions.add(newSession);
-							System.out.println("\t\tcreate: " + newSession.getFirstTime() + ", size = " + newSession.getMenues().size());
+							monitor.println("\t\tcreate: " + newSession.getFirstTime() + ", size = " + newSession.getMenues().size());
+							cache.clear();
 						}
 					}
 				}
@@ -210,12 +217,12 @@ public class MenulogSessionCount {
 			// Sitzungen veröffentlichen 
 			for (UserSession x: sessions) {
 				context.write(key, x);
-				System.out.println("\t\t\tpublish: " + x.getFirstTime() + " --> " + x.getMenues().size());
+				monitor.println("\t\t\tpublish: " + x.getFirstTime() + " --> " + x.getMenues().size());
 			}
 			
-			System.out.println(key.toString() + " (" + count + ") --> " + sessions.size());
+			monitor.println(key.toString() + " (" + count + ") --> " + sessions.size());
 			
-//			sessions.clear();
+			sessions.clear();
 			
 		}
 		
@@ -232,6 +239,7 @@ public class MenulogSessionCount {
 			if (min <= time && time <= max) {
 				success = true;
 			}
+			monitor.println("\t\tcheck: " + min + " / " + time + " / " + max + " = " + success);
 			return success;
 		}
 
