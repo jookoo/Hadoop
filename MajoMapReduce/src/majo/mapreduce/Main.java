@@ -31,9 +31,9 @@ public class Main {
 
 	public static void main(final String[] args) throws Exception {	
 		// Konfiguration
-		Configuration conf = new Configuration();
-		conf.set(MENULOG_FILTER_USERNAME, "22");
-		conf.setInt(MENULOG_MINUTES_MAX, 30);
+		final Configuration conf = new Configuration();
+//		conf.set(MENULOG_FILTER_USERNAME, "22");
+//		conf.setInt(MENULOG_MINUTES_MAX, 30);
 
 		int code = 0;
 		
@@ -57,7 +57,7 @@ public class Main {
 
 	private static Job createInputInfoJob(
 			final Configuration conf) throws IOException {
-		Job job = Job.getInstance(conf, InputInfoJob.class.getSimpleName());
+		final Job job = Job.getInstance(conf, InputInfoJob.class.getSimpleName());
 		job.setJarByClass(InputInfoJob.class);
 		job.setMapperClass(TokenizerMapper.class);
 		job.setCombinerClass(IntSumReducer.class);

@@ -13,6 +13,10 @@
 	<property name="build.dir"   value="D:/Downloads/hadoop-2.6/build" />
 	<property name="classes.dir" value="${build.dir}/classes" />
 	<property name="jar.dir"     value="${build.dir}/jar" />
+	<property name="headnode"    value="172.16.1.154" />
+	<property name="destpath"    value="/home/hadoop2-6" />
+	<property name="upload.dir"  
+			value="${username}:${passwd}@${headnode}:${destpath}"/>
 
 	<target name="clean">
 		<delete dir="${build.dir}" />
@@ -32,6 +36,19 @@
 				<attribute name="Main-Class" value="${main-class-majo}" />
 			</manifest>
 		</jar>
+		<scp todir="${upload.dir}" trust="true" port="2244"> 
+			<fileset dir="${build.dir}"> 
+				<exclude name="**/build.xml"/> 
+				<exclude name="**/.*"/>
+			</fileset>
+		</scp>
+		
+		<!-- sshexec host="${headnode}"
+				 port="2244"
+		         username="${username}"
+		         password="${passwd}"
+		         trust="true"
+		         command="${destpath}/prephadoop.sh*" /-->
 	</target>
 	
 	<!-- run shell script <target name="run" depends="jar"> <exec executable="sh"> 
