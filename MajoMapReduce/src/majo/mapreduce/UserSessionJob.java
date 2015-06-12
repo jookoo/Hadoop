@@ -53,7 +53,14 @@ public class UserSessionJob {
 			final Configuration conf = context.getConfiguration();
 			final String filterUser = conf.get(Main.MENULOG_FILTER_USERNAME);
 			
+			/**
+			 * Mapper lesen im Standardfall CSV Dateien Zeilenweise ein,
+			 * daher entspricht {@code value} einer Zeile im CSV und kann
+			 * in das Objekt MenulogLine übersetzt werden.
+			 */
 			final MenulogLine line = new MenulogLine(value.toString());
+			
+			
 			final String prg = line.getProgram().getName();
 			if (acceptProgram(prg)) {
 				final String username = line.getUser();
@@ -64,7 +71,7 @@ public class UserSessionJob {
 //							&& Calendar.FEBRUARY == cal.get(Calendar.MONTH)
 //							&& 3 == cal.get(Calendar.DAY_OF_MONTH)) {
 						final long timestamp = cal.getTimeInMillis();
-						final String menue = line.getValue();
+						final String menue = line.getCleanValue();
 						final UserSession session = 
 								new UserSession(username, timestamp, menue);
 						context.write(new Text(username), session);
@@ -143,10 +150,10 @@ public class UserSessionJob {
 			
 			// Sitzungen ermitteln
 			int count = 0;
-			for (UserSession x: values) {
+			for (final UserSession x: values) {
 				final Map<Long, String> menues = x.getMenues();
 				monitor.println("\tmenues: first = " + x.getFirstTime() + ", size = " + menues.size());
-				for (Entry<Long, String> e: menues.entrySet()) {
+				for (final Entry<Long, String> e: menues.entrySet()) {
 					// aktuelle Wert: Zeit + Menüpunkt
 					final long time = e.getKey().longValue();
 					final String menue = e.getValue();
@@ -181,7 +188,7 @@ public class UserSessionJob {
 			
 			
 			// Sitzungen veröffentlichen 
-			for (UserSession x: sessions) {
+			for (final UserSession x: sessions) {
 				context.write(key, x);
 				monitor.println("\t\t\tpublish: " + x.getFirstTime() + " --> " + x.getMenues().size());
 			}

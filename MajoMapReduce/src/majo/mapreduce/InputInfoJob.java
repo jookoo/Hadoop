@@ -33,7 +33,7 @@ public class InputInfoJob {
 			word.set("USER[" + line.getUser() + "]");
 			context.write(word, one);
 			// Auswahl
-			word.set("VALUE[" + line.getProgram().getName() + "~" + line.getValue() + "]");
+			word.set("VALUE[" + line.getProgram().getName() + "~" + line.getCleanValue() + "]");
 			context.write(word, one);
 		}
 		
@@ -49,7 +49,7 @@ public class InputInfoJob {
 		public void reduce(final Text key, final Iterable<IntWritable> values,
 				final Context context) throws IOException, InterruptedException {
 			int sum = 0;
-			for (IntWritable val : values) {
+			for (final IntWritable val : values) {
 				sum += val.get();
 			}
 			result.set(sum);

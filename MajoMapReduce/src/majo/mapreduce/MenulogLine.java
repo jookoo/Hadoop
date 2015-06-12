@@ -8,6 +8,8 @@ import java.util.GregorianCalendar;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Beschreibt eine Zeile der Menulog-Dateien.
@@ -20,6 +22,25 @@ import java.util.Set;
 public class MenulogLine {
 	
 	private static final int INDEX_MAX = 7;
+	
+	/**
+	 * 3.  Bis zum 04.05.2015
+	 * 2. Preise von Kunde 16725
+	 * 2.   Ab dem 07.04.2015
+	 * 1. Genau am 03.04.2015
+	 * 1. Fax-Bestellung (0921-89721)
+	 * 1. Fax-Bestellung (02102-2047-109)
+	 * 4. E-Mail-Bestellung (Anja.Luesebrink@ampri.de)
+	 * 
+	 */
+	private static final String[] CLEANUP = new String[] {
+		"(3.  Bis zum) \\d\\d\\.\\d\\d\\.\\d\\d\\d\\d",
+		"(2. Preise von Kunde) \\d{2,}", 
+		"(2.   Ab dem) \\d\\d\\.\\d\\d\\.\\d\\d\\d\\d", 
+		"(1. Genau am) \\d\\d\\.\\d\\d\\.\\d\\d\\d\\d", 
+		"(1. Fax-Bestellung) \\(.*\\)",
+		"(\\d+. E-Mail-Bestellung) \\(([\\w]+[\\.\\-]?)+@([\\w\\-]+\\.)+[a-zA-Z]{2,4}\\)", 
+	};
 
 	/** Tag/Uhrzeit der Aktion */
 	private final Calendar date;
@@ -32,6 +53,9 @@ public class MenulogLine {
 	
 	/** Auswahl vom benutzer */
 	private final String value;
+	
+	/** bereinigte Auswahl vom benutzer */
+	private final String cleanValue;
 	
 	/** Funktionsstack bei Aktion */
 	private final Set<String> stack;
@@ -46,13 +70,33 @@ public class MenulogLine {
 		if (tokens.length != INDEX_MAX) {
 			throw new IllegalArgumentException("[tokens.length] != " + INDEX_MAX);
 		}
-		this.date = createDate(tokens[0], tokens[1]);
-		this.user = tokens[2];
-		this.program = new File(tokens[3]);
-		this.value = tokens[5];
-		this.stack = new LinkedHashSet<>();
+		date = createDate(tokens[0], tokens[1]);
+		user = tokens[2];
+		program = new File(tokens[3]);
+		value = tokens[5];
+		cleanValue = cleanup(value);
+		stack = new LinkedHashSet<>();
 	}
 
+	private String cleanup(final String x) {
+		String y = null;
+		if (null != x) {
+			// eindampfen
+			for (final String regex: CLEANUP) {
+				final Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+				final Matcher m = p.matcher(x);
+				if (m.find()) {
+					y = m.group(1);
+				}
+			}
+			// Leerzeichen
+			if (null != y) {
+				y = y.replaceAll("[ ]{2,}", " ");
+			}
+		}
+		return y;
+	}
+	
 	private Calendar createDate(final String yyyymmdd, final String hhMMss) {
 		final Calendar cal = GregorianCalendar.getInstance();
 		cal.set(Calendar.YEAR, Integer.parseInt(yyyymmdd.substring(0, 4)));
@@ -78,6 +122,14 @@ public class MenulogLine {
 		return program;
 	}
 	
+	public String getValue() {
+		return value;
+	}
+
+	public String getCleanValue() {
+		return (null == cleanValue ? value : cleanValue);
+	}
+	
 	@Override
 	public String toString() {
 		final StringBuffer sb = new StringBuffer();
@@ -89,10 +141,6 @@ public class MenulogLine {
 		sb.append("value = ").append(value);
 		sb.append("]");
 		return sb.toString();
-	}
-
-	public String getValue() {
-		return value;
 	}
 
 }

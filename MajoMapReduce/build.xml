@@ -14,7 +14,7 @@
 	<property name="classes.dir" value="${build.dir}/classes" />
 	<property name="jar.dir"     value="${build.dir}/jar" />
 	<property name="headnode"    value="172.16.1.154" />
-	<property name="destpath"    value="/home/hadoop2-6" />
+	<property name="destpath"    value="/home/admin/majo" />
 	<property name="upload.dir"  
 			value="${username}:${passwd}@${headnode}:${destpath}"/>
 
@@ -38,8 +38,6 @@
 		</jar>
 		<scp todir="${upload.dir}" trust="true" port="2244"> 
 			<fileset dir="${build.dir}"> 
-				<exclude name="**/build.xml"/> 
-				<exclude name="**/.*"/>
 			</fileset>
 		</scp>
 		
