@@ -33,6 +33,17 @@ public class MenulogLineTest {
 	
 	private static final String LINE8 = "20150214;09:02:22;21;;;4. E-Mail-Bestellung (Anja.Luesebrink@ampri.de);ABC->DEF";
 	
+	final static String[][] CMD_REP = new String[][] {
+		{"20150214;09:02:22;21;C:\\AUFTRAG\\AUFTRAG.EXE;;Eine Auswahl;ABC->DEF", "GH"},
+		{"20150214;09:02:22;21;C:\\BUR\\GH\\AUF\\AU_BLI.EXE;;Eine Auswahl;ABC->DEF", "GH"},
+		{"20150214;09:02:22;21;R:\\XPRG\\VOLLNEU\\AU\\AUWIN950.EXE;;Eine Auswahl;ABC->DEF", "GH"},
+		{"20150214;09:02:22;21;C:\\BUR\\BUCHHALT\\BUCH.EXE;;Eine Auswahl;ABC->DEF", "KND_BUHA"},
+		{"20150214;09:02:22;21;R:\\BUCHPRG\\BUCHHALT\\BUCH.EXE;;Eine Auswahl;ABC->DEF", "KND_BUHA"},
+		{"20150214;09:02:22;21;C:\\BUR\\LIEFBUCH\\LIEFBUCH.EXE;;Eine Auswahl;ABC->DEF", "LIEF_BUHA"},
+		{"20150214;09:02:22;21;R:\\BUCHPRG\\LIEFBUCH\\LIEFBUCH.EXE;;Eine Auswahl;ABC->DEF", "LIEF_BUHA"},
+//		{"20150214;09:02:22;21;R:\BUCHPRG\BUCHHALT\BUCHDEMO.EXE;;Eine Auswahl;ABC->DEF", null}
+	};
+	
 	private static final Calendar CAL = GregorianCalendar.getInstance();
 	
 	static {
@@ -74,49 +85,59 @@ public class MenulogLineTest {
 	}
 	
 	@Test
-	public void testCleanupValue() {
-		{
-			final MenulogLine x = new MenulogLine(LINE3);
-			System.out.println(x);
-			assertEquals("3. Bis zum", x.getCleanValue());
-		}
-		{
-			final MenulogLine x = new MenulogLine(LINE4);
-			System.out.println(x);
-			assertEquals("2. Preise von Kunde", x.getCleanValue());
-		}
-		{
-			final MenulogLine x = new MenulogLine(LINE5);
-			System.out.println(x);
-			assertEquals("2. Ab dem", x.getCleanValue());
-		}
-		{
-			final MenulogLine x = new MenulogLine(LINE6);
-			System.out.println(x);
-			assertEquals("1. Genau am", x.getCleanValue());
-		}
-		{
-			final MenulogLine x = new MenulogLine(LINE7);
-			System.out.println(x);
-			assertEquals("1. Fax-Bestellung", x.getCleanValue());
-		}
-		{
-			final MenulogLine x = new MenulogLine(LINE7B);
-			System.out.println(x);
-			assertEquals("1. Fax-Bestellung", x.getCleanValue());
-		}
-		{
-			final MenulogLine x = new MenulogLine(LINE8);
-			System.out.println(x);
-			assertEquals("4. E-Mail-Bestellung", x.getCleanValue());
-		}
+	public void testCleanupValueBiszum() {
+		final MenulogLine x = new MenulogLine(LINE3);
+		System.out.println(x);
+		assertEquals("3. Bis zum", x.getCleanValue());
+	}
+	
+	@Test
+	public void testCleanupValuePreise() {
+		final MenulogLine x = new MenulogLine(LINE4);
+		System.out.println(x);
+		assertEquals("2. Preise von Kunde", x.getCleanValue());
+	}
+	@Test
+	public void testCleanupValueAbdem() {
+		final MenulogLine x = new MenulogLine(LINE5);
+		System.out.println(x);
+		assertEquals("2. Ab dem", x.getCleanValue());
+	}
+	
+	@Test
+	public void testCleanupValueGenauam() {
+		final MenulogLine x = new MenulogLine(LINE6);
+		System.out.println(x);
+		assertEquals("1. Genau am", x.getCleanValue());
+	}
+	
+	@Test
+	public void testCleanupValueEmail() {
+		final MenulogLine x = new MenulogLine(LINE8);
+		System.out.println(x);
+		assertEquals("4. E-Mail-Bestellung", x.getCleanValue());
 	}
 	
 	@Test
 	public void testCleanupValueFax() {
-		final MenulogLine x = new MenulogLine(LINE7B);
-		System.out.println(x);
-		assertEquals("1. Fax-Bestellung", x.getCleanValue());
+		final MenulogLine x1 = new MenulogLine(LINE7);
+		System.out.println(x1);
+		assertEquals("1. Fax-Bestellung", x1.getCleanValue());
+		
+		final MenulogLine x2 = new MenulogLine(LINE7B);
+		System.out.println(x2);
+		assertEquals("1. Fax-Bestellung", x2.getCleanValue());
+	}
+	
+	@Test
+	public void testCleanupProgramAuftragexe() {
+		for (final String[] line: CMD_REP) {
+			final String actual = line[0];
+			final String expected = line[1];
+			final MenulogLine x = new MenulogLine(actual);
+			System.out.println(x);
+			assertEquals(expected, x.getCleanProgram());
+		}
 	}
 	
 }

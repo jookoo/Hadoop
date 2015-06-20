@@ -10,7 +10,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 /**
  * Liefert grundlegende Informationen zu den Input-Dateien.
  * 
- * @author majo
+ * @author joshua.kornfeld@bur-kg.de
  *
  */
 public class InputInfoJob {
@@ -33,7 +33,7 @@ public class InputInfoJob {
 			word.set("USER[" + line.getUser() + "]");
 			context.write(word, one);
 			// Auswahl
-			word.set("VALUE[" + line.getProgram().getName() + "~" + line.getCleanValue() + "]");
+			word.set("VALUE[" + line.getCleanProgram() + "~" + line.getCleanValue() + "]");
 			context.write(word, one);
 		}
 		

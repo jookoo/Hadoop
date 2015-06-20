@@ -1,6 +1,5 @@
 package majo.mapreduce;
 
-import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -20,10 +19,12 @@ import java.util.regex.Pattern;
  *
  */
 public class MenulogLine {
-	
+
 	private static final int INDEX_MAX = 7;
-	
+
 	/**
+	 * Datensatz bestehend aus REGEX-Pattern zur Bereinigung der Daten.
+	 * 
 	 * 3.  Bis zum 04.05.2015
 	 * 2. Preise von Kunde 16725
 	 * 2.   Ab dem 07.04.2015
@@ -42,24 +43,47 @@ public class MenulogLine {
 		"(\\d+. E-Mail-Bestellung) \\(([\\w]+[\\.\\-]?)+@([\\w\\-]+\\.)+[a-zA-Z]{2,4}\\)", 
 	};
 
+	/**
+	 * Datensatz bestehen aus REGEX-Pattern um Namen von ausführbaren Dateien
+	 * dem jeweiligen Programm zuzuordnen.
+	 * 
+	 * C:\AUFTRAG\AUFTRAG.EXE -> GH
+	 * C:\BUR\GH\AUF\AU_BLI.EXE -> GH
+	 * R:\XPRG\VOLLNEU\AU\AUWIN950.EXE -> GH
+	 * C:\BUR\BUCHHALT\BUCH.EXE || R:\BUCHPRG\BUCHHALT\BUCH.EXE -> KND_BUHA
+	 * C:\BUR\LIEFBUCH\LIEFBUCH.EXE || R:\BUCHPRG\LIEFBUCH\LIEFBUCH -> LIEF_BUHA
+	 * TODO R:\BUCHPRG\BUCHHALT\BUCHDEMO.EXE -> null
+	 */
+	private static final String[][] REPLACE_PRG = new String[][] {
+		{".*AUFTRAG\\.EXE$", "GH"},
+		{".*AU_BLI\\.EXE$", "GH"},
+		{".*AUWIN[\\d]+\\.EXE$", "GH"},
+		{".*BUCH\\.EXE$", "KND_BUHA"},
+		{".*LIEFBUCH\\.EXE$", "LIEF_BUHA"},
+	};
+
 	/** Tag/Uhrzeit der Aktion */
 	private final Calendar date;
-	
+
 	/** Benutzerkürzel */
 	private final String user;
-	
+
 	/** Pfad zum Programm */
-	private final File program;
-	
+	private final String program;
+
+	/** normalisiertes Programm */
+	private final String cleanProgram;
+
 	/** Auswahl vom benutzer */
 	private final String value;
-	
+
 	/** bereinigte Auswahl vom benutzer */
 	private final String cleanValue;
-	
+
 	/** Funktionsstack bei Aktion */
 	private final Set<String> stack;
-	
+
+
 	/**
 	 * Erstellt ein Objekt mit den Werten von {@code line}.
 	 * @param line eine Menulog-Zeile
@@ -72,10 +96,24 @@ public class MenulogLine {
 		}
 		date = createDate(tokens[0], tokens[1]);
 		user = tokens[2];
-		program = new File(tokens[3]);
+		program = tokens[3];
+		cleanProgram = cleanupReplace(program);
 		value = tokens[5];
 		cleanValue = cleanup(value);
 		stack = new LinkedHashSet<>();
+	}
+
+	private String cleanupReplace(final String x) {
+		String y = null;
+		if (null != x) {
+			// Programmnamen ersetzen
+			for (final String[] regex: REPLACE_PRG) {
+				if (x.matches(regex[0])) {
+					y = regex[1];
+				}
+			}
+		}
+		return y;
 	}
 
 	private String cleanup(final String x) {
@@ -96,7 +134,7 @@ public class MenulogLine {
 		}
 		return y;
 	}
-	
+
 	private Calendar createDate(final String yyyymmdd, final String hhMMss) {
 		final Calendar cal = GregorianCalendar.getInstance();
 		cal.set(Calendar.YEAR, Integer.parseInt(yyyymmdd.substring(0, 4)));
@@ -118,10 +156,10 @@ public class MenulogLine {
 		return user;
 	}
 
-	public File getProgram() {
+	public String getProgram() {
 		return program;
 	}
-	
+
 	public String getValue() {
 		return value;
 	}
@@ -129,14 +167,23 @@ public class MenulogLine {
 	public String getCleanValue() {
 		return (null == cleanValue ? value : cleanValue);
 	}
-	
+
+	/**
+	 * Liefert das Ergebnis des Mappings verschiedener EXE Dateien auf einen
+	 * Programmnamen.
+	 * @return ein Objekt oder <code>null</code>
+	 */
+	public String getCleanProgram() {
+		return cleanProgram;
+	}
+
 	@Override
 	public String toString() {
 		final StringBuffer sb = new StringBuffer();
 		sb.append(MenulogLine.class.getName()).append(" [");
 		final DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 		sb.append("date = ").append(df.format(date.getTime())).append(", ");
-		sb.append("program = ").append(program.getAbsolutePath()).append(", ");
+		sb.append("program = ").append(program).append(", ");
 		sb.append("user = ").append(user).append(", ");
 		sb.append("value = ").append(value);
 		sb.append("]");

@@ -44,7 +44,9 @@ public class UserSessionJob {
 
 		/** der Programmfilter */
 		public static final String FILTER_PRG = 
-				".*\\\\AU(FTRAG)?(_BLI)?(WIN[\\d]+)?\\.EXE$";
+				"(GH)|(KND_BUHA)|(LIEF_BUHA)";
+		// Vor der Filterung
+//		".*\\\\(FTRAG)?(_BLI)?(WIN[\\d]+)?\\.EXE$";
 		
 		@Override
 		public void map(
@@ -61,7 +63,7 @@ public class UserSessionJob {
 			final MenulogLine line = new MenulogLine(value.toString());
 			
 			
-			final String prg = line.getProgram().getName();
+			final String prg = line.getCleanProgram();
 			if (acceptProgram(prg)) {
 				final String username = line.getUser();
 				if (null == filterUser || filterUser.equals(username)) {
