@@ -18,7 +18,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 /**
  * Konfiguration und Starter für die gesamte Aufgabenstellung.
  * 
- * @author majo
+ * @author joshua.kornfeld@bur-kg.de
  *
  */
 public class Main {

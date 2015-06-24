@@ -15,7 +15,7 @@ import org.apache.hadoop.io.WritableComparable;
 /**
  * Beschreibt eine Benutzersitzung.
  * 
- * @author majo
+ * @author joshua.kornfeld@bur-kg.de
  *
  */
 public class UserSession implements Writable, WritableComparable<UserSession> {
@@ -27,7 +27,7 @@ public class UserSession implements Writable, WritableComparable<UserSession> {
 	private String username = "???";
 	
 	/** Einträge der Sitzung; Sortierung entspricht Zeitschlüssel */
-	private TreeMap<Long, String> menues = new TreeMap<>();
+	private final TreeMap<Long, String> menues = new TreeMap<>();
 
 	/**
 	 * Parameterloser Konstruktor für {@link Writable}.
@@ -82,7 +82,7 @@ public class UserSession implements Writable, WritableComparable<UserSession> {
 	public void write(final DataOutput out) throws IOException {
 		out.writeUTF(username);
 		out.writeInt(menues.size());
-		for (Long time: menues.keySet()) {
+		for (final Long time: menues.keySet()) {
 			out.writeLong(time);
 			out.writeUTF(menues.get(time));
 		}
@@ -103,7 +103,7 @@ public class UserSession implements Writable, WritableComparable<UserSession> {
 	@Override
 	public String toString() {
 		final StringBuffer sb = new StringBuffer(DATE_FORMAT.format(new Date(getFirstTime()))).append(" ");
-		for (Entry<Long, String> x: menues.entrySet()) {
+		for (final Entry<Long, String> x: menues.entrySet()) {
 			sb.append("[");
 			sb.append(x.getKey().longValue());
 			sb.append(":");

@@ -17,7 +17,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 /**
  * Ananlyse der Benutzersitzungen.
  * 
- * @author majo
+ * @author joshua.kornfeld@bur-kg.de
  *
  */
 public class UserSessionJob {
@@ -45,8 +45,6 @@ public class UserSessionJob {
 		/** der Programmfilter */
 		public static final String FILTER_PRG = 
 				"(GH)|(KND_BUHA)|(LIEF_BUHA)";
-		// Vor der Filterung
-//		".*\\\\(FTRAG)?(_BLI)?(WIN[\\d]+)?\\.EXE$";
 		
 		@Override
 		public void map(
@@ -62,24 +60,18 @@ public class UserSessionJob {
 			 */
 			final MenulogLine line = new MenulogLine(value.toString());
 			
-			
 			final String prg = line.getCleanProgram();
+			// Falls bestimmte Programme von der Auswertung ausgeschlossen werden sollen
 			if (acceptProgram(prg)) {
 				final String username = line.getUser();
+				// Falls eine Auswertung zu einem spezifischen Benutzer gemacht werden soll
 				if (null == filterUser || filterUser.equals(username)) {
-					// Filter: /input/150203.CSV
 					final Calendar cal = line.getDateTime();
-//					if (2015 == cal.get(Calendar.YEAR) 
-//							&& Calendar.FEBRUARY == cal.get(Calendar.MONTH)
-//							&& 3 == cal.get(Calendar.DAY_OF_MONTH)) {
-						final long timestamp = cal.getTimeInMillis();
-						final String menue = line.getCleanValue();
-						final UserSession session = 
-								new UserSession(username, timestamp, menue);
-						context.write(new Text(username), session);
-//					} else {
-//						context.getCounter(COUNTER.OTHER_DATETIME_LINE).increment(1);					
-//					}
+					final long timestamp = cal.getTimeInMillis();
+					final String menue = line.getCleanValue();
+					final UserSession session = 
+							new UserSession(username, timestamp, menue);
+					context.write(new Text(username), session);
 				} else {
 					context.getCounter(COUNTER.OTHER_USERNAME_LINE).increment(1);					
 				}
@@ -116,7 +108,34 @@ public class UserSessionJob {
 		/** die Startseiten */
 		private static final Set<String> STARTPAGES = new HashSet<>();	
 		static {
+			STARTPAGES.add("1. Aufträge");
 			STARTPAGES.add("2. Auskunft");
+			STARTPAGES.add("3. Rechnungen");
+			STARTPAGES.add("4. Bestellungen");
+			STARTPAGES.add("5. Belastungen");
+			STARTPAGES.add("6. Gutschriften / Abholscheine");
+			STARTPAGES.add("7. Artikel-Verwaltung");
+			STARTPAGES.add("8. Textverarbeitung");
+			STARTPAGES.add("9. Listen");
+			STARTPAGES.add("A. Etiketten / Schilder / Belege");
+			STARTPAGES.add("D. Postrechnungen drucken");
+			STARTPAGES.add("E. Sonderpreise");
+			STARTPAGES.add("F. Wareneingang");
+			STARTPAGES.add("G. Rechnungseingang");
+			STARTPAGES.add("H. Dienst-Programme");
+			STARTPAGES.add("I. Gutschrift / Neue Rechnung");
+			STARTPAGES.add("K. Artikelnummern der Kunden");
+			STARTPAGES.add("L. Ware abholen (sofort Rechnung)");
+			STARTPAGES.add("M. Fremdbelege erfassen");
+			STARTPAGES.add("N. Zusätzliche Pack-Nummern drucken");
+			STARTPAGES.add("O. Tourenplanung");
+			STARTPAGES.add("P. Empfangsscheine Scannen");
+			STARTPAGES.add("Q. Nur für 18");
+			STARTPAGES.add("R. Belegerfassung");
+			STARTPAGES.add("S. Anfragen");
+			STARTPAGES.add("U. Vorgänge");
+			STARTPAGES.add("V. Fremprogramme");
+			STARTPAGES.add("W. Nachlieferung");
 		}
 		
 		/** die Abschlussseiten */
@@ -132,6 +151,10 @@ public class UserSessionJob {
 		 */
 		private static final long FACTOR = (60 * 1000);
 		
+		/** 
+		 * die Verzögerung, die Zeiten zwischen zwei 
+		 * Menüklicks als Teil der Session akzeptiert 
+		 */
 		private long delay = (30 * FACTOR);
 		
 		@Override

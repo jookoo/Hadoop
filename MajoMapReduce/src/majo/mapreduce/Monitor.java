@@ -3,7 +3,7 @@ package majo.mapreduce;
 /**
  * Sammelt Ereignisse und gibt sie lesbar aus (Standard: {@link System#out}).
  * 
- * @author majo
+ * @author joshua.kornfeld@bur-kg.de
  *
  */
 public class Monitor {
@@ -23,6 +23,10 @@ public class Monitor {
 		count++;
 	}
 	
+	/**
+	 * Ausgabe über die Standard-Konsole.
+	 * @param value der auszugebende Wert
+	 */
 	public void println(final String value) {
 		if (onoff) {
 			System.out.println(String.format("[%d] %s\n", count, value));
