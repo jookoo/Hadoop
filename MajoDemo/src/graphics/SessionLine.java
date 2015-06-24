@@ -1,6 +1,7 @@
 package graphics;
 
 import graphics.InformationCreator.Edge;
+import graphics.InformationCreator.Menu;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -101,8 +102,10 @@ public class SessionLine {
 			} else {
 				to = entry.getValue();
 				final Edge edge = new Edge();
-				edge.add(from);
-				edge.add(to);
+				final Menu f = new Menu(from);
+				final Menu t = new Menu(to);
+				edge.add(f);
+				edge.add(t);
 				edges.add(edge);
 				from = to;
 			}
