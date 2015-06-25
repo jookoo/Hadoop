@@ -37,12 +37,12 @@ public class Graphics {
 	    
 	    TreeBuilder(final Graph<Menu,Edge> graph) {
 	        mTree = new DelegateForest<>();
-//	        for (final String n : graph.getVertices()) {
-//        		mTree.addVertex(n);
-//	        }
-//	        for (final String e : graph.getEdges()) {
-//        		mTree.addEdge(e, graph.getSource(e),graph.getDest(e));
-//	        }
+	        for (final Menu n : graph.getVertices()) {
+        		mTree.addVertex(n);
+	        }
+	        for (final Edge e : graph.getEdges()) {
+        		mTree.addEdge(e, graph.getSource(e), graph.getDest(e));
+	        }
 	    }
 	    
 	    public DelegateForest<Menu, Edge> getTree()  {

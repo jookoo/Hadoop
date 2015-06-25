@@ -6,6 +6,8 @@ import java.awt.geom.Ellipse2D;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -50,9 +52,15 @@ public class InformationCreator {
 		}
 		for (final InfoLine il: infos) {
 			if (!il.isWorkerLine()) {
-				final double percentage = sum / 100 * il.getCount();
+				final BigDecimal count = new BigDecimal(il.getCount());
+				final BigDecimal bdsum = new BigDecimal(sum);
+				final BigDecimal bd100 = new BigDecimal(100);
+				final BigDecimal percentage = count.divide(bdsum.divide(bd100, 5, BigDecimal.ROUND_HALF_UP),  5, BigDecimal.ROUND_HALF_UP);
 				final Menu m = new Menu(il.getMenu());
-				m.setSize((float) percentage);
+				if (1 > percentage.doubleValue()) {
+					System.out.println("");
+				}
+				m.setSize(percentage);
 				sizes.add(m);
 			}
 		}
@@ -61,18 +69,12 @@ public class InformationCreator {
 	private void calculateEdgeweight() {
 		double sum = 0D;
 		for (final Edge e: getSessionEdges()) {
-			if (1 < e.getThickness()) {
-				System.out.println("size" + e.getThickness());
-			}
 			sum = sum + e.getThickness();
 		}
 		if (0D == sum) {
 			sum = 1D;
 		}
 		for (final Edge e: getSessionEdges()) {
-			if (1 < e.getThickness()) {
-				System.out.println("");
-			}
 			final Float d = e.getThickness();
 			final double percantage = d / (sum / 100);
 			e.setThickness((float) percantage);
@@ -171,7 +173,8 @@ public class InformationCreator {
 		},
 		EBENE2{
 			
-		}
+		};
+		
 	}
 	/**
 	 * Ein Menüpunkt, mit anzahl an Aufrufen und Ebene 
@@ -179,8 +182,42 @@ public class InformationCreator {
 	 */
 	protected static class Menu {
 
+		/** die Startseiten */
+		private static final Set<String> STARTS = new HashSet<>();	
+		static {
+			STARTS.add("1 Aufträge");
+			STARTS.add("2 Auskunft");
+			STARTS.add("3 Rechnungen");
+			STARTS.add("4 Bestellungen");
+			STARTS.add("5 Belastungen");
+			STARTS.add("6 Gutschriften / Abholscheine");
+			STARTS.add("7 Artikel-Verwaltung");
+			STARTS.add("8 Textverarbeitung");
+			STARTS.add("9 Listen");
+			STARTS.add("A Etiketten / Schilder / Belege");
+			STARTS.add("D Postrechnungen drucken");
+			STARTS.add("E Sonderpreise");
+			STARTS.add("F Wareneingang");
+			STARTS.add("G Rechnungseingang");
+			STARTS.add("H Dienst-Programme");
+			STARTS.add("I Gutschrift / Neue Rechnung");
+			STARTS.add("K Artikelnummern der Kunden");
+			STARTS.add("L Ware abholen (sofort Rechnung)");
+			STARTS.add("M Fremdbelege erfassen");
+			STARTS.add("N Zusätzliche Pack-Nummern drucken");
+			STARTS.add("O Tourenplanung");
+			STARTS.add("P Empfangsscheine Scannen");
+			STARTS.add("Q Nur für 18");
+			STARTS.add("R Belegerfassung");
+			STARTS.add("S Anfragen");
+			STARTS.add("U Vorgänge");
+			STARTS.add("V Fremprogramme");
+			STARTS.add("W Nachlieferung");
+		}
+		
+		
 		private final String name;
-		private float size = 1;
+		private BigDecimal size = BigDecimal.ONE;
 		public Menu(final String name) {
 			this.name = name;
 		}
@@ -189,7 +226,7 @@ public class InformationCreator {
 			return name;
 		}
 		
-		public void setSize(final float size) {
+		public void setSize(final BigDecimal size) {
 			this.size  = size;
 		}
 		
@@ -198,9 +235,18 @@ public class InformationCreator {
 			return name;
 		}
 
-		public float getSize() {
+		public BigDecimal getSize() {
 			return size;
 		}
+		
+		public boolean isStartpage() {
+			return STARTS.contains(name);
+		}
+		
+		// Für Ebenen
+//		public int getStage() {
+//			return
+//		}
 		
 	}
 	
@@ -268,23 +314,15 @@ public class InformationCreator {
 		
 	}
 
-	public Transformer<String, Shape> createVertexSizeTransformer() {
-		final Transformer<String,Shape> vertexSize = new Transformer<String, Shape>(){
+	public Transformer<Menu, Shape> createVertexSizeTransformer() {
+		final Transformer<Menu,Shape> vertexSize = new Transformer<Menu, Shape>(){
             @Override
-			public Shape transform(final String s){
+			public Shape transform(final Menu m){
                 final Ellipse2D circle = new Ellipse2D.Double(-15, -15, 30, 30);
                 // in this case, the vertex is twice as large
-                for (final Menu m: getSizes()) {
-                	if (m.getName().equals(s)) {
-            			final Double percantage = (double) m.getSize();
-	                	if (null == percantage) {
-	                		return circle;
-	                	} else {
-	                		return AffineTransform.getScaleInstance(percantage, percantage).createTransformedShape(circle);
-	                	}
-                	}
-                }
-                return circle;
+    			final BigDecimal percentage = m.getSize();
+    			System.out.println(percentage);
+        		return AffineTransform.getScaleInstance(percentage.floatValue(), percentage.floatValue()).createTransformedShape(circle);
             }
         };
         return vertexSize;

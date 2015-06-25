@@ -15,6 +15,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Paint;
+import java.awt.Shape;
 import java.awt.Stroke;
 import java.util.LinkedList;
 import java.util.List;
@@ -67,21 +68,21 @@ public class Main {
 		
 		
 		  // Transformer maps the vertex number to a vertex property
-        final Transformer<String,Paint> vertexColor = new Transformer<String, Paint>() {
+        final Transformer<Menu,Paint> vertexColor = new Transformer<Menu, Paint>() {
             @Override
-			public Paint transform(final String s) {
-                if(s.equals("2 Auskunft")) {
+			public Paint transform(final Menu m) {
+                if(m.isStartpage()) {
 					return Color.GREEN;
+				} else {
+					return Color.RED;
 				}
-                return Color.RED;
             }
         };
         
-        
-//        final Transformer<String,Shape> vertexSize =  creator.createVertexSizeTransformer();
+        final Transformer<Menu,Shape> vertexSize =  creator.createVertexSizeTransformer();
 //        
-//        vv.getRenderContext().setVertexFillPaintTransformer(vertexColor);
-//        vv.getRenderContext().setVertexShapeTransformer(vertexSize);
+        vv.getRenderContext().setVertexFillPaintTransformer(vertexColor);
+        vv.getRenderContext().setVertexShapeTransformer(vertexSize);
 
         
         final Transformer<Edge, Paint> edgePaint = new Transformer<Edge, Paint>() {
@@ -98,11 +99,11 @@ public class Main {
         };
 
         final Transformer<Edge, Stroke> edgeStroke = new Transformer<Edge, Stroke>() {
-            float dash[] = { 10.0f };
+            float dash[] = { 1.0f };
             @Override
 			public Stroke transform(final Edge e) {
-                return new BasicStroke(1.0f, BasicStroke.CAP_BUTT,
-                        BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f);
+                return new BasicStroke(e.getConnectedVertecis().size(), BasicStroke.CAP_BUTT,
+                        BasicStroke.JOIN_MITER, 1.0f, dash, 0.0f);
             }
         };
 
@@ -151,6 +152,9 @@ public class Main {
 			final JScrollPane spane = new JScrollPane();
 			spane.getViewport().add(table);
 			add(spane, BorderLayout.CENTER);
+			final JPanel soutp = new JPanel();
+			soutp.add(new JLabel("#Menüpunkte "+ model.getSize()));
+			add(soutp, BorderLayout.SOUTH);
 		}
 		
 	}
@@ -173,6 +177,9 @@ public class Main {
 			final JScrollPane spane = new JScrollPane();
 			spane.getViewport().add(table);
 			add(spane, BorderLayout.CENTER);
+			final JPanel soutp = new JPanel();
+			soutp.add(new JLabel("#Mitarbeiter "+ model.getSize()));
+			add(soutp, BorderLayout.SOUTH);
 		}
 		
 	}

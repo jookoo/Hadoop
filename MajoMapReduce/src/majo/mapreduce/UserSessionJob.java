@@ -106,7 +106,7 @@ public class UserSessionJob {
 		private final Monitor monitor = new Monitor(false);
 		
 		/** die Startseiten */
-		private static final Set<String> STARTPAGES = new HashSet<>();	
+		public static final Set<String> STARTPAGES = new HashSet<>();	
 		static {
 			STARTPAGES.add("1. Aufträge");
 			STARTPAGES.add("2. Auskunft");
