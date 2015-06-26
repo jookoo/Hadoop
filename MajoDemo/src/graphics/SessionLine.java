@@ -6,11 +6,13 @@ import graphics.InformationCreator.Menu;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Repräsentiert eine Zeile in der user_session.txt.
@@ -92,7 +94,12 @@ public class SessionLine {
 		return null;
 	}
 
+	/**
+	 * Geht entlang einer Session und baut Flanken zwischen den Menüpunkten auf.
+	 * @return
+	 */
 	public List<Edge> getEdges() {
+		final Set<Menu> menus = new LinkedHashSet<>();
 		final List<Edge> edges = new LinkedList<>();
 		String from = null;
 		String to = null;
@@ -102,8 +109,8 @@ public class SessionLine {
 			} else {
 				to = entry.getValue();
 				final Edge edge = new Edge();
-				final Menu f = new Menu(from);
-				final Menu t = new Menu(to);
+				final Menu f = new Menu(from, null);
+				final Menu t = new Menu(to, from);
 				edge.add(f);
 				edge.add(t);
 				edges.add(edge);
@@ -113,4 +120,25 @@ public class SessionLine {
 		return edges;
 	}
 	
+	/**
+	 * Geht entlang einer Session und baut die Menüpuntke auf.
+	 * @return
+	 */
+	public Set<Menu> getMenus() {
+		final Set<Menu> menus = new LinkedHashSet<>();
+		String from = null;
+		String to = null;
+		for (final Entry<Long, String> entry: map.entrySet()) {
+			if (null == from) {
+				from = entry.getValue();
+				
+			} else {
+				to = entry.getValue();
+				final Menu t = new Menu(to, from);
+				menus.add(t);
+				from = to;
+			}
+		}
+		return menus;
+	}
 }

@@ -1,7 +1,7 @@
 package graphics;
 
-import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
+import edu.uci.ics.jung.algorithms.layout.TreeLayout;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
@@ -54,14 +54,16 @@ public class Main {
 		
 		// der Vertex muss Layer haben...
 		final Set<Edge> set = creator.getWeightedEdges();
-		final Set<Menu> map = creator.getSizes();
+		final Set<Menu> map = creator.getSizedMenues();
 		
 		// Grafik
 		final Graphics graphic = new Graphics(map, set);
 		// Layout<V, E>, VisualizationComponent<V,E>
 		final Layout<Menu, Edge> layout = 
-				new FRLayout<>(graphic.getForest());
-		layout.setSize(new Dimension(600,600));
+				new TreeLayout<Menu, Edge>(graphic.getForest());
+		
+		
+//		layout.setSize(new Dimension(600,600));
 		final VisualizationViewer<Menu, Edge> vv = 
 				new VisualizationViewer<>(layout);
 		vv.setPreferredSize(new Dimension(800,800));
@@ -89,21 +91,19 @@ public class Main {
             @Override
 			public Paint transform(final Edge e) {
             	final Color c;
-            	if (5 > e.getConnectedVertecis().size()) {
-            		c = Color.RED;
-            	} else {
+            	if (50 < e.getWeight()) {
             		c = Color.GREEN;
+            	} else {
+            		c = Color.RED;
             	}
                 return c;
             }
         };
 
         final Transformer<Edge, Stroke> edgeStroke = new Transformer<Edge, Stroke>() {
-            float dash[] = { 1.0f };
             @Override
 			public Stroke transform(final Edge e) {
-                return new BasicStroke(e.getConnectedVertecis().size(), BasicStroke.CAP_BUTT,
-                        BasicStroke.JOIN_MITER, 1.0f, dash, 0.0f);
+                return new BasicStroke(e.getThickness());
             }
         };
 
@@ -117,7 +117,7 @@ public class Main {
 		
 		// Create a graph mouse and add it to the visualization component
 		final DefaultModalGraphMouse gm = new DefaultModalGraphMouse();
-		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+		gm.setMode(ModalGraphMouse.Mode.PICKING);
 		vv.setGraphMouse(gm); 
 		final JFrame frame = new JFrame("Nutzung des B+R Systems");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

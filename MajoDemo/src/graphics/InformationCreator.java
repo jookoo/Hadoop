@@ -7,10 +7,13 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.collections15.Transformer;
@@ -21,9 +24,9 @@ public class InformationCreator {
 	
 	private final Set<InfoLine> infos = new LinkedHashSet<>();
 	
-	private final Set<Menu> sizes = new LinkedHashSet<>();
+	private final Set<Menu> sizes = new HashSet<>();
 	
-	private final Set<Edge> weights = new LinkedHashSet<>();
+	private final Set<Edge> weightedEdges = new LinkedHashSet<>();
 	
 	public InformationCreator() {
 	}
@@ -32,62 +35,57 @@ public class InformationCreator {
 		if (null != filename && filename.contains("user_session.txt")) {
 			sessions.addAll(createSessionLines(filename));
 			calculateEdgeweight();
+			calculateSizes();
 		} else {
 			infos.addAll(createInfoLines(filename));
-			calculateSizes();
 		}
 		
 		
 	}
 	
 	private void calculateSizes() {
-		long sum = 0;
-		for (final InfoLine il: infos) {
-			if (!il.isWorkerLine()) {
-				sum = sum + il.getCount();
-			}
+		double sum = 0D;
+		for (final Menu e: getSessionMenues()) {
+			sum = sum + e.getWeight();
 		}
-		if (0 == sum) {
-			sum = 1;
+		if (0D == sum) {
+			sum = 1D;
 		}
-		for (final InfoLine il: infos) {
-			if (!il.isWorkerLine()) {
-				final BigDecimal count = new BigDecimal(il.getCount());
-				final BigDecimal bdsum = new BigDecimal(sum);
-				final BigDecimal bd100 = new BigDecimal(100);
-				final BigDecimal percentage = count.divide(bdsum.divide(bd100, 5, BigDecimal.ROUND_HALF_UP),  5, BigDecimal.ROUND_HALF_UP);
-				final Menu m = new Menu(il.getMenu());
-				if (1 > percentage.doubleValue()) {
-					System.out.println("");
-				}
-				m.setSize(percentage);
-				sizes.add(m);
-			}
+		for (final Menu m: getSessionMenues()) {
+			final BigDecimal count = new BigDecimal(m.getWeight());
+			final BigDecimal bdsum = new BigDecimal(sum);
+			final BigDecimal bd100 = new BigDecimal(100);
+			final BigDecimal percentage = 
+					count.divide(bdsum.divide(bd100, 5, BigDecimal.ROUND_HALF_UP),  5, BigDecimal.ROUND_HALF_UP);
+			m.setSize(percentage);
+			sizes.add(m);
 		}
 	}
 	
 	private void calculateEdgeweight() {
 		double sum = 0D;
-		for (final Edge e: getSessionEdges()) {
-			sum = sum + e.getThickness();
+		for (final Entry<String, Edge> entry: getSessionEdges().entrySet()) {
+			final Edge e = entry.getValue();
+			sum = sum + e.getWeight();
 		}
 		if (0D == sum) {
 			sum = 1D;
 		}
-		for (final Edge e: getSessionEdges()) {
-			final Float d = e.getThickness();
+		for (final Entry<String, Edge> entry: getSessionEdges().entrySet()) {
+			final Edge e = entry.getValue();
+			final int d = e.getWeight();
 			final double percantage = d / (sum / 100);
 			e.setThickness((float) percantage);
-			weights.add(e);
+			weightedEdges.add(e);
 		}
 	}
 	
-	public Set<Menu> getSizes() {
+	public Set<Menu> getSizedMenues() {
 		return sizes;
 	}
 	
 	public Set<Edge> getWeightedEdges() {
-		return weights;
+		return weightedEdges;
 	}
 
 	public Set<SessionLine> getSessions() {
@@ -99,14 +97,36 @@ public class InformationCreator {
 	}
 	
 	
-	public Set<Edge> getSessionEdges() {
-		final Set<Edge> x = new LinkedHashSet<>();
+	public Map<String, Edge> getSessionEdges() {
+		final Map<String, Edge> x = new HashMap<>();
 		for(final SessionLine sl: sessions) {
 			final List<Edge> edges = sl.getEdges();
-			for (final Edge e: edges) {
-				final float f = e.getThickness();
-				e.setThickness(f + 1);
-				x.add(e);
+			for (final Edge tmp: edges) {
+				final String name = tmp.getName();
+				if (!x.containsKey(name)) {
+					x.put(name, tmp);
+				}
+				final Edge e = x.get(name);
+				e.addWeight();
+			}
+		}
+		return x;
+	}
+	
+	public Set<Menu> getSessionMenues() {
+		final Set<Menu> x = new HashSet<>();
+		for(final SessionLine sl: sessions) {
+			final Set<Menu> menues = sl.getMenus();
+			for (final Menu tmp: menues) {
+				if (!x.contains(tmp)) {
+					x.add(tmp);
+				}
+				addweight:for (final Menu m: x) {
+					if (m.equals(tmp)) {
+						m.addWeight();
+						break addweight;
+					}
+				}
 			}
 		}
 		return x;
@@ -150,10 +170,10 @@ public class InformationCreator {
             	final SessionLine sl = new SessionLine(line);
             	x.add(sl);
             	line = br.readLine();
-            	count++;
-            	if(count > 1000) {
+            	if(count > 2) {
             		break einlesen;
             	}
+            	count++;
             }
             fr.close();
         } catch (final IOException e){
@@ -177,51 +197,30 @@ public class InformationCreator {
 		
 	}
 	/**
-	 * Ein Menüpunkt, mit anzahl an Aufrufen und Ebene 
+	 * Ein Menüpunkt, mit Anzahl an Aufrufen und Ebene 
 	 *
 	 */
 	protected static class Menu {
 
-		/** die Startseiten */
-		private static final Set<String> STARTS = new HashSet<>();	
-		static {
-			STARTS.add("1 Aufträge");
-			STARTS.add("2 Auskunft");
-			STARTS.add("3 Rechnungen");
-			STARTS.add("4 Bestellungen");
-			STARTS.add("5 Belastungen");
-			STARTS.add("6 Gutschriften / Abholscheine");
-			STARTS.add("7 Artikel-Verwaltung");
-			STARTS.add("8 Textverarbeitung");
-			STARTS.add("9 Listen");
-			STARTS.add("A Etiketten / Schilder / Belege");
-			STARTS.add("D Postrechnungen drucken");
-			STARTS.add("E Sonderpreise");
-			STARTS.add("F Wareneingang");
-			STARTS.add("G Rechnungseingang");
-			STARTS.add("H Dienst-Programme");
-			STARTS.add("I Gutschrift / Neue Rechnung");
-			STARTS.add("K Artikelnummern der Kunden");
-			STARTS.add("L Ware abholen (sofort Rechnung)");
-			STARTS.add("M Fremdbelege erfassen");
-			STARTS.add("N Zusätzliche Pack-Nummern drucken");
-			STARTS.add("O Tourenplanung");
-			STARTS.add("P Empfangsscheine Scannen");
-			STARTS.add("Q Nur für 18");
-			STARTS.add("R Belegerfassung");
-			STARTS.add("S Anfragen");
-			STARTS.add("U Vorgänge");
-			STARTS.add("V Fremprogramme");
-			STARTS.add("W Nachlieferung");
-		}
-		
-		
 		private final String name;
+		private final String parentNode;
 		private BigDecimal size = BigDecimal.ONE;
-		public Menu(final String name) {
+		private int weight = 1; 
+		
+		
+		public Menu(final String name, final String parentNode) {
 			this.name = name;
+			this.parentNode = parentNode;
 		}
 		
+		public double getWeight() {
+			return weight;
+		}
+
+		public void addWeight() {
+			weight++;
+		}
+
 		public String getName() {
 			return name;
 		}
@@ -239,8 +238,12 @@ public class InformationCreator {
 			return size;
 		}
 		
+		public String getParentNode() {
+			return parentNode;
+		}
+		
 		public boolean isStartpage() {
-			return STARTS.contains(name);
+			return null == parentNode;
 		}
 		
 		// Für Ebenen
@@ -248,17 +251,56 @@ public class InformationCreator {
 //			return
 //		}
 		
+		@Override
+		public int hashCode() {
+			final int prime = 1013;
+			int hashCode = prime * getName().hashCode();
+			hashCode = prime + (null == getParentNode() ? 0 :getParentNode().hashCode());
+			return hashCode;
+		}
+		
+		@Override
+		public boolean equals(final Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null) {
+				return false;
+			}
+			if (getClass() != obj.getClass()) {
+				return false;
+			}
+			return this.hashCode() == obj.hashCode();
+		}
 	}
 	
+	/**
+	 * Repräsentiert eine Flanke zwischen zwei Menüpunkten.
+	 *
+	 * Die Dicke entscheidet über die Häufigkeit der Nutzung
+	 *
+	 */
 	protected static class Edge {
 		
 		private final List<Menu> connectedVertex = new LinkedList<>();
 		
-		private float thickness = 1;
+		/** Gewicht der Kante, bestimmt durch Häufigkeit der Nutzung */
+		private int weight = 1;
+		
+		/** Prozentuale Größe gegenüber allen bekannten Kanten */
+		private float thickness = 0f;
 
 		protected Edge() {
 		}
 		
+		public int getWeight() {
+			return weight;
+		}
+
+		public void addWeight() {
+			weight++;
+		}
+
 		public void add(final Menu s) {
 			connectedVertex.add(s);
 		}
@@ -275,16 +317,19 @@ public class InformationCreator {
 			return thickness;
 		}
 
+		public final Menu getFrom() {
+			return connectedVertex.get(0);
+		}
+		
+		public final Menu getTo() {
+			return connectedVertex.get(1);
+		}
+		
 		public String getName() {
 			final StringBuffer x = new StringBuffer();
-			for (final Menu s :connectedVertex) {
-				if (0 == x.length()) {
-					x.append(s);
-				} else {
-					x.append(" --> ");
-					x.append(s);
-				}
-			}
+			x.append(getFrom().getName());
+			x.append(" --> ");
+			x.append(getTo().getName());
 			return x.toString();
 		}
 		
@@ -319,9 +364,7 @@ public class InformationCreator {
             @Override
 			public Shape transform(final Menu m){
                 final Ellipse2D circle = new Ellipse2D.Double(-15, -15, 30, 30);
-                // in this case, the vertex is twice as large
     			final BigDecimal percentage = m.getSize();
-    			System.out.println(percentage);
         		return AffineTransform.getScaleInstance(percentage.floatValue(), percentage.floatValue()).createTransformedShape(circle);
             }
         };
