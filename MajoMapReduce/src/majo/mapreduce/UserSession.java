@@ -20,6 +20,7 @@ import org.apache.hadoop.io.WritableComparable;
  */
 public class UserSession implements Writable, WritableComparable<UserSession> {
 	
+	/** ein Datums-Format */
 	private static final SimpleDateFormat DATE_FORMAT = 
 			new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 	
@@ -38,7 +39,9 @@ public class UserSession implements Writable, WritableComparable<UserSession> {
 	/**
 	 * Instanziiert eine Session für den Benutzernamen {@code username} und
 	 * legt dessen ersten Eintrag an.
-	 * @param username ein Benutzername
+	 * @param username der Benutzer
+	 * @param time das Datum
+	 * @param menue der erste Menüeintrag
 	 */
 	public UserSession(
 			final String username, final long time, final String menue) {

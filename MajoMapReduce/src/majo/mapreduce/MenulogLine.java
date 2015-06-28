@@ -94,8 +94,7 @@ public class MenulogLine {
 	/**
 	 * Erstellt ein Objekt mit den Werten von {@code line}.
 	 * 
-	 * @param line
-	 *            eine Menulog-Zeile
+	 * @param line eine Menulog-Zeile
 	 */
 	public MenulogLine(final String line) {
 		Objects.requireNonNull(line);
@@ -158,6 +157,12 @@ public class MenulogLine {
 		return y;
 	}
 
+	/**
+	 * Erzeugt ein <code>Calendar</code> Objekt aus übergebenen Zeichenketten.
+	 * @param yyyymmdd eine Zeichenkette für Jahre, Monat, Tag
+	 * @param hhMMss eine Zeichenkette für Stunde, Minute, Sekunde
+	 * @return ein Objekt, niemals <code>null</code>
+	 */
 	private Calendar createDate(final String yyyymmdd, final String hhMMss) {
 		final Calendar cal = GregorianCalendar.getInstance();
 		cal.set(Calendar.YEAR, Integer.parseInt(yyyymmdd.substring(0, 4)));
@@ -172,30 +177,58 @@ public class MenulogLine {
 		return cal;
 	}
 
+	/**
+	 * Liefert das Calendarobjekt mit dem Datum der Zeile
+	 * @return ein Objekt, niemals <code>null</code>
+	 */
 	public Calendar getDateTime() {
 		return date;
 	}
 
+	/**
+	 * Liefert den Benutzer, der die Zeile zu verantworten hat.
+	 * @return ein Objekt, niemals <code>null</code>
+	 */
 	public String getUser() {
 		return user;
 	}
 
+	/**
+	 * Liefert den Programmpfad, mit dem die Zeile erstellt wurde.
+	 * @return ein Objekt, niemals <code>null</code>
+	 */
 	public String getProgram() {
 		return program;
 	}
 
+	/**
+	 * Liefert den gewählten Menüpunkt der Zeile.
+	 * @return ein Objekt, niemals <code>null</code>
+	 */
 	public String getValue() {
 		return value;
 	}
 
+	/**
+	 * Liefert den den bereinigten Menüpunkt.
+	 * <p>
+	 * siehe {@link MenulogLine#CLEANUP} und 
+	 * {@link MenulogLine#cleanupValue(String)} für Informationen
+	 * zur Bereinigung
+	 * @return ein Objekt, niemals <code>null</code>
+	 */
 	public String getCleanValue() {
 		return (null == cleanValue ? value : cleanValue);
 	}
 
 	/**
 	 * Liefert das Ergebnis des Mappings verschiedener EXE Dateien auf einen
-	 * Programmnamen.
-	 * 
+	 * Programmnamen. Wird null geliefert wurde das Programm beabsichtigt
+	 * ignoriert.
+	 * <p>
+	 * siehe {@link MenulogLine#REPLACE_PRG} und 
+	 * {@link MenulogLine#cleanupProgram(String)} für Informationen
+	 * zur Ersetzung
 	 * @return ein Objekt oder <code>null</code>
 	 */
 	public String getCleanProgram() {

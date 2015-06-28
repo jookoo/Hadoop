@@ -5,7 +5,7 @@ import org.junit.Test;
 /**
  * Prüft die Klasse {@link UserSession}.
  * 
- * @author majo
+ * @author joshua.kornfeld@bur-kg.de
  *
  */
 public class UserSessionTest {

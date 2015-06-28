@@ -1,13 +1,14 @@
 package majo.mapreduce;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
 /**
  * Prüft die Klasse {@link UserSessionJob}.
  * 
- * @author majo
+ * @author joshua.kornfeld@bur-kg.de
  *
  */
 public class UserSessionJobTest {
@@ -24,7 +25,7 @@ public class UserSessionJobTest {
 		};
 		final UserSessionJob.UserValueMapper main = 
 				new UserSessionJob.UserValueMapper(); 
-		for (Object[] x: data) {
+		for (final Object[] x: data) {
 			final String prg = (String) x[0];
 			final boolean check = (boolean) x[1];
 			final boolean result = main.acceptProgram(prg);

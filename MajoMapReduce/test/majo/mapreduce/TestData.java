@@ -3,7 +3,7 @@ package majo.mapreduce;
 /**
  * Konstanten für die Tests.
  * 
- * @author majo
+ * @author joshua.kornfeld@bur-kg.de
  *
  */
 public interface TestData {

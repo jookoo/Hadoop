@@ -3,6 +3,7 @@ package majo.mapreduce;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -15,7 +16,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 
 /**
- * Ananlyse der Benutzersitzungen.
+ * MapReduce-Job zur Analyse der Benutzersitzungen.
  * 
  * @author joshua.kornfeld@bur-kg.de
  *
@@ -26,10 +27,10 @@ public class UserSessionJob {
 	 * Beschreibung für verschiedene Zähler im Job.
 	 */
 	public static enum COUNTER {
+		  /** Zähler für herausgefilterte Benutzer (durch {@link Main#MENULOG_FILTER_USERNAME} */
 		  OTHER_PROGRAM_LINE,
+		  /** Zähler für herausgefilterte Benutzer (durch {@link UserSessionJob#FILTER_PRG} */
 		  OTHER_USERNAME_LINE,
-		  OTHER_DATETIME_LINE,
-		  MATCH_LINE
 	}
 
 	/**
@@ -39,8 +40,7 @@ public class UserSessionJob {
 	 * ist ein Objekt {@link UserSession}. Letzteres nimmt den Benutzernamen 
 	 * (zusätzlich zum Schlüssel), den Zeitpunkt und den Menüpunkt auf.
 	 */
-	public static class UserValueMapper 
-	extends Mapper<Object, Text, Text, UserSession> {
+	public static class UserValueMapper extends Mapper<Object, Text, Text, UserSession> {
 
 		/** der Programmfilter */
 		public static final String FILTER_PRG = 
@@ -63,7 +63,8 @@ public class UserSessionJob {
 			final String prg = line.getCleanProgram();
 			// Falls bestimmte Programme von der Auswertung ausgeschlossen werden sollen
 			if (acceptProgram(prg)) {
-				final String username = line.getUser();
+				final String usernameTmp = line.getUser();
+				final String username = (null == usernameTmp ? null : usernameTmp.toLowerCase(Locale.GERMAN));
 				// Falls eine Auswertung zu einem spezifischen Benutzer gemacht werden soll
 				if (null == filterUser || filterUser.equals(username)) {
 					final Calendar cal = line.getDateTime();
@@ -99,8 +100,7 @@ public class UserSessionJob {
 	/**
 	 * Reduziert die vom {@link UserValueMapper} gesammelten Werte pro Benutzer.
 	 */
-	public static class SessionReducer 
-	extends Reducer<Text, UserSession, Text, UserSession> {
+	public static class SessionReducer extends Reducer<Text, UserSession, Text, UserSession> {
 
 		/** eine Ausgabe zur Fehlersuche */
 		private final Monitor monitor = new Monitor(false);
