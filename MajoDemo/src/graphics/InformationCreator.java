@@ -1,8 +1,5 @@
 package graphics;
 
-import java.awt.Shape;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Ellipse2D;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -15,8 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import org.apache.commons.collections15.Transformer;
 
 public class InformationCreator {
 
@@ -170,7 +165,7 @@ public class InformationCreator {
             	final SessionLine sl = new SessionLine(line);
             	x.add(sl);
             	line = br.readLine();
-            	if(count > 2) {
+            	if(count > 100) {
             		break einlesen;
             	}
             	count++;
@@ -255,7 +250,7 @@ public class InformationCreator {
 		public int hashCode() {
 			final int prime = 1013;
 			int hashCode = prime * getName().hashCode();
-			hashCode = prime + (null == getParentNode() ? 0 :getParentNode().hashCode());
+			hashCode = hashCode + (null == getParentNode() ? 0 :getParentNode().hashCode());
 			return hashCode;
 		}
 		
@@ -355,19 +350,4 @@ public class InformationCreator {
 		}
 	}
 
-	protected static class ConnectorInformation {
-		
-	}
-
-	public Transformer<Menu, Shape> createVertexSizeTransformer() {
-		final Transformer<Menu,Shape> vertexSize = new Transformer<Menu, Shape>(){
-            @Override
-			public Shape transform(final Menu m){
-                final Ellipse2D circle = new Ellipse2D.Double(-15, -15, 30, 30);
-    			final BigDecimal percentage = m.getSize();
-        		return AffineTransform.getScaleInstance(percentage.floatValue(), percentage.floatValue()).createTransformedShape(circle);
-            }
-        };
-        return vertexSize;
-	}
 }

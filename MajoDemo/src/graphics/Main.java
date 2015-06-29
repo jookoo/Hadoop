@@ -1,7 +1,7 @@
 package graphics;
 
 import edu.uci.ics.jung.algorithms.layout.Layout;
-import edu.uci.ics.jung.algorithms.layout.TreeLayout;
+import edu.uci.ics.jung.algorithms.layout.RadialTreeLayout;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
@@ -17,6 +17,9 @@ import java.awt.Dimension;
 import java.awt.Paint;
 import java.awt.Shape;
 import java.awt.Stroke;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Ellipse2D;
+import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -60,7 +63,7 @@ public class Main {
 		final Graphics graphic = new Graphics(map, set);
 		// Layout<V, E>, VisualizationComponent<V,E>
 		final Layout<Menu, Edge> layout = 
-				new TreeLayout<Menu, Edge>(graphic.getForest());
+				new RadialTreeLayout<Menu, Edge>(graphic.getForest());
 		
 		
 //		layout.setSize(new Dimension(600,600));
@@ -81,8 +84,15 @@ public class Main {
             }
         };
         
-        final Transformer<Menu,Shape> vertexSize =  creator.createVertexSizeTransformer();
-//        
+        final Transformer<Menu,Shape> vertexSize = new Transformer<Menu, Shape>(){
+            @Override
+			public Shape transform(final Menu m){
+                final Ellipse2D circle = new Ellipse2D.Double(-15, -15, 30, 30);
+    			final BigDecimal percentage = m.getSize();
+        		return AffineTransform.getScaleInstance(percentage.floatValue(), percentage.floatValue()).createTransformedShape(circle);
+            }
+        };
+        
         vv.getRenderContext().setVertexFillPaintTransformer(vertexColor);
         vv.getRenderContext().setVertexShapeTransformer(vertexSize);
 
@@ -117,7 +127,7 @@ public class Main {
 		
 		// Create a graph mouse and add it to the visualization component
 		final DefaultModalGraphMouse gm = new DefaultModalGraphMouse();
-		gm.setMode(ModalGraphMouse.Mode.PICKING);
+		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
 		vv.setGraphMouse(gm); 
 		final JFrame frame = new JFrame("Nutzung des B+R Systems");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

@@ -121,7 +121,7 @@ public class SessionLine {
 	}
 	
 	/**
-	 * Geht entlang einer Session und baut die Menüpuntke auf.
+	 * Geht entlang einer Session und baut die Menüpunkte auf.
 	 * @return
 	 */
 	public Set<Menu> getMenus() {
@@ -131,11 +131,14 @@ public class SessionLine {
 		for (final Entry<Long, String> entry: map.entrySet()) {
 			if (null == from) {
 				from = entry.getValue();
-				
+				final Menu m = new Menu(from, null);
+				menus.add(m);
 			} else {
 				to = entry.getValue();
-				final Menu t = new Menu(to, from);
-				menus.add(t);
+				final Menu m = new Menu(to, from);
+				if (!menus.contains(m)) {
+					menus.add(m);
+				}
 				from = to;
 			}
 		}
