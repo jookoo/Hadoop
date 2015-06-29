@@ -155,7 +155,7 @@ public class UserSessionJob {
 		 * die Verzögerung, die Zeiten zwischen zwei 
 		 * Menüklicks als Teil der Session akzeptiert 
 		 */
-		private long delay = (30 * FACTOR);
+		private long delay = (240 * FACTOR);
 		
 		@Override
 		public void reduce(
