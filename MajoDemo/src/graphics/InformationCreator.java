@@ -226,7 +226,7 @@ public class InformationCreator {
 		
 		@Override
 		public String toString() {
-			return name;
+			return name+(null == parentNode ? "" : " von " + parentNode);
 		}
 
 		public BigDecimal getSize() {
@@ -250,7 +250,7 @@ public class InformationCreator {
 		public int hashCode() {
 			final int prime = 1013;
 			int hashCode = prime * getName().hashCode();
-			hashCode = hashCode + (null == getParentNode() ? 0 :getParentNode().hashCode());
+			hashCode = hashCode + (null == getParentNode() ? 1039 :getParentNode().hashCode());
 			return hashCode;
 		}
 		
@@ -331,7 +331,9 @@ public class InformationCreator {
 		@Override
 		public int hashCode() {
 			final int prime = 1009;
-			final int hashCode = prime * getName().hashCode();
+			int hashCode = prime * getName().hashCode();
+			hashCode = hashCode + getFrom().hashCode();
+			hashCode = hashCode + getTo().hashCode();
 			return hashCode;
 		}
 		

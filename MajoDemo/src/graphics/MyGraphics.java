@@ -30,18 +30,27 @@ public class MyGraphics {
 		this.set = set;
 		mTree = new DelegateForest<Menu, Edge>();
 
-		for (final Menu m:vertecis) {
-			g.addVertex(m);
-		}
-		for (final Edge e: set) {
-			g.addEdge(e, e.getFrom(), e.getTo());
-		}
-
 		for (final Menu n : vertecis) {
+			if (n.getName().contains("Kunden-Nr")) {
+				System.out.println("");
+			}
 			mTree.addVertex(n);
 		}
 		for (final Edge e : set) {
-			mTree.addEdge(e, e.getFrom(), e.getTo());
+			Menu from = null;
+			for (final Menu m : vertecis) {
+				if (m.getName().equals(e.getFrom().getName())) {
+					from = m;
+				}
+			}
+			Menu to = null;
+			for (final Menu m : vertecis) {
+				if (m.getName().equals(e.getTo().getName())) {
+					to = m;
+				}
+			}
+			
+			mTree.addEdge(e, from, to);
 		}
 	}
 
