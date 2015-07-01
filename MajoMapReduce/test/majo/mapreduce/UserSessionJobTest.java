@@ -37,9 +37,4 @@ public class UserSessionJobTest {
 		}
 	}
 	
-	@Test
-	public void testReduce() {
-		
-	}
-	
 }

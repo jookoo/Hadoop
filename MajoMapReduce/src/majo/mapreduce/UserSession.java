@@ -115,7 +115,28 @@ public class UserSession implements Writable, WritableComparable<UserSession> {
 		}
 		return sb.toString();
 	}
-
+	
+	@Override
+	public int hashCode() {
+		final int prime = 1039;
+		final int hashCode = prime * username.hashCode();
+		return hashCode;
+	}
+	
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		return this.hashCode() == obj.hashCode();
+	}
+	
 	@Override
 	public int compareTo(final UserSession other) {
 		int x = username.compareTo(other.username);

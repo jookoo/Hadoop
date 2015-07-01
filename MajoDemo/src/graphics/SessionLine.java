@@ -5,6 +5,7 @@ import graphics.InformationCreator.Menu;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -26,6 +27,42 @@ import java.util.Set;
 public class SessionLine {
 
 	private static final int INDEX_MAX = 2;
+	
+	/** die Startseiten */
+	public static final Set<String> STARTPAGES = new HashSet<>();	
+	static {
+		STARTPAGES.add("1 Aufträge");
+		STARTPAGES.add("2 Auskunft");
+		STARTPAGES.add("3 Rechnungen");
+		STARTPAGES.add("4 Bestellungen");
+		STARTPAGES.add("5 Belastungen");
+		STARTPAGES.add("6 Gutschriften / Abholscheine");
+		STARTPAGES.add("7 Artikel-Verwaltung");
+		STARTPAGES.add("8 Textverarbeitung");
+		STARTPAGES.add("9 Listen");
+		STARTPAGES.add("A Etiketten / Schilder / Belege");
+		STARTPAGES.add("D Postrechnungen drucken");
+		STARTPAGES.add("E Sonderpreise");
+		STARTPAGES.add("F Wareneingang");
+		STARTPAGES.add("G Rechnungseingang");
+		STARTPAGES.add("H Dienst-Programme");
+		STARTPAGES.add("I Gutschrift / Neue Rechnung");
+		STARTPAGES.add("K Artikelnummern der Kunden");
+		STARTPAGES.add("L Ware abholen (sofort Rechnung)");
+		STARTPAGES.add("M Fremdbelege erfassen");
+		STARTPAGES.add("N Zusätzliche Pack-Nummern drucken");
+		STARTPAGES.add("O Tourenplanung");
+		STARTPAGES.add("P Empfangsscheine Scannen");
+		STARTPAGES.add("Q Nur für 18");
+		STARTPAGES.add("R Belegerfassung");
+		STARTPAGES.add("S Anfragen");
+		STARTPAGES.add("U Vorgänge");
+		STARTPAGES.add("V Fremprogramme");
+		STARTPAGES.add("W Nachlieferung");
+	}
+	
+	
+	
 	
 	/** Benutzerkürzel */
 	private final String user;

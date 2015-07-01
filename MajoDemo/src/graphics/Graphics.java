@@ -17,7 +17,7 @@ import graphics.InformationCreator.Menu;
  */
 public class Graphics {
 	
-	private final Graph<Menu, Edge> g = new DirectedSparseMultigraph<>();
+	private final Graph<Menu, Edge> g = new DirectedSparseMultigraph<Menu, Edge>();
 	
 	public Graphics(final Set<Menu> vertecis, final Set<Edge> set) {
 		for (final Menu m:vertecis) {

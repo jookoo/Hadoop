@@ -136,7 +136,7 @@ public class MenulogLine {
 	 * @param x eine Zeichenkette
 	 * @return ein Objekt oder <code>null</code>
 	 */
-	private String cleanupValue(final String x) {
+	public String cleanupValue(final String x) {
 		String y = null;
 		if (null != x) {
 			// eindampfen

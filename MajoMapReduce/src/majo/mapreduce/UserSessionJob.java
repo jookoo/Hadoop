@@ -189,12 +189,11 @@ public class UserSessionJob {
 							cache.put(Long.valueOf(time), menue);
 							monitor.println("\t\tinit");
 						} else {
-							System.out.println(menue);
-							if ((!STARTPAGES.contains(menue))) { 
-//									&& checkMinMaxTime(
-//									cache.firstKey().longValue(), 
-//									cache.lastKey().longValue(), 
-//									time)) {
+							if (!STARTPAGES.contains(menue) && 
+									checkMinMaxTime(
+									cache.firstKey().longValue(), 
+									cache.lastKey().longValue(), 
+									time)) {
 								// gehört mit zur akt. Sitzung
 								cache.put(Long.valueOf(time), menue);
 								monitor.println("\t\tcache: " + time + " >> " + cache.size());

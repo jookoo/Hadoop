@@ -214,7 +214,7 @@ public class Main {
 
 		/** die Daten */
 		private final List<InfoLine> data = new LinkedList<>();
-
+		
 		/** 
 		 * Ein Konstruktor. 
 		 */
@@ -281,18 +281,6 @@ public class Main {
 		}
 		
 	}
-	
-	private static class MyEdgeDisplay<V> implements Transformer<V,String> {
-
-	    /**
-	     * Retunrs v.toString()
-	     */
-	    @Override
-		public String transform(final V v) {
-	        return "";
-	    }
-
-	 }
 	
 	//unused
 	private static class InfoTableCellRenderer extends DefaultTableCellRenderer {
