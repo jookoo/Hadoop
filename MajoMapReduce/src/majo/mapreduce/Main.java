@@ -39,8 +39,8 @@ public class Main {
 	public static void main(final String[] args) throws Exception {	
 		// Konfiguration
 		final JobConf conf = new JobConf();
-//		conf.set(MENULOG_FILTER_USERNAME, "22");
-//		conf.setInt(MENULOG_MINUTES_MAX, 30);
+		conf.set(MENULOG_FILTER_USERNAME, "10");
+		conf.setInt(MENULOG_MINUTES_MAX, 240);
 		int code = 0;
 
 		// Aktiviert die Komprimierung der Ergebnis-Datei
@@ -49,8 +49,8 @@ public class Main {
 		
 		
 		// Job 1 anlegen/ausführen
-		final Job sequenceJob = createFileSequencerJob(conf);
-		code += (sequenceJob.waitForCompletion(true) ? 0 : 1);
+//		final Job sequenceJob = createFileSequencerJob(conf);
+//		code += (sequenceJob.waitForCompletion(true) ? 0 : 1);
 
 		// Job 2 anlegen/ausführen
 		final Job inputInfoJob = createInputInfoJob(conf);
@@ -157,7 +157,7 @@ public class Main {
 
 		// Mappper + Combiner
 		job.setMapperClass(UserValueMapper.class);
-		job.setCombinerClass(SessionReducer.class);
+//		job.setCombinerClass(SessionReducer.class);
 
 		// Reducer
 		job.setReducerClass(SessionReducer.class);

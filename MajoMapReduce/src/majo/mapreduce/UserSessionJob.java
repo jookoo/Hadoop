@@ -155,7 +155,7 @@ public class UserSessionJob {
 		 * die Verzögerung, die Zeiten zwischen zwei 
 		 * Menüklicks als Teil der Session akzeptiert 
 		 */
-		private long delay = (240 * FACTOR);
+		private long delay = (30 * FACTOR);
 		
 		@Override
 		public void reduce(
@@ -164,6 +164,7 @@ public class UserSessionJob {
 						throws IOException, InterruptedException {
 			// gesammelte Sitzungen
 			final TreeSet<UserSession> sessions = new TreeSet<>();
+			// TreeMap um nach Zeit zu sortieren
 			final TreeMap<Long,String> cache = new TreeMap<>();
 
 			// Konfiguration
@@ -184,14 +185,16 @@ public class UserSessionJob {
 					final String menue = e.getValue();
 					if (!ENDPAGES.contains(menue)) {
 						if (cache.isEmpty()) {
-							// neue Sitzung beginnen
+							// neue Sitzung beginnen // geht fälschlicherweise von start mit startpage aus
 							cache.put(Long.valueOf(time), menue);
 							monitor.println("\t\tinit");
 						} else {
-							if ((!STARTPAGES.contains(menue)) && checkMinMaxTime(
-									cache.firstKey().longValue(), 
-									cache.lastKey().longValue(), 
-									time)) {
+							System.out.println(menue);
+							if ((!STARTPAGES.contains(menue))) { 
+//									&& checkMinMaxTime(
+//									cache.firstKey().longValue(), 
+//									cache.lastKey().longValue(), 
+//									time)) {
 								// gehört mit zur akt. Sitzung
 								cache.put(Long.valueOf(time), menue);
 								monitor.println("\t\tcache: " + time + " >> " + cache.size());
@@ -210,7 +213,6 @@ public class UserSessionJob {
 				}
 				count++;
 			}			
-			
 			
 			// Sitzungen veröffentlichen 
 			for (final UserSession x: sessions) {

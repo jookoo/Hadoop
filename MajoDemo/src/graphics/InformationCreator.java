@@ -165,7 +165,7 @@ public class InformationCreator {
             	final SessionLine sl = new SessionLine(line);
             	x.add(sl);
             	line = br.readLine();
-            	if(count > 100) {
+            	if(count > 10000) {
             		break einlesen;
             	}
             	count++;
