@@ -1,7 +1,6 @@
 package graphics;
 
 import edu.uci.ics.jung.algorithms.layout.Layout;
-import edu.uci.ics.jung.algorithms.layout.RadialTreeLayout;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
@@ -35,7 +34,7 @@ import javax.swing.table.DefaultTableModel;
 
 import org.apache.commons.collections15.Transformer;
 
-public class Main {
+public class MainDEPRECATED {
 	
 	private static final String FILENAME_INFO = "C:\\input_info.txt";
 
@@ -60,10 +59,10 @@ public class Main {
 		final Set<Menu> map = creator.getSizedMenues();
 		
 		// Grafik
-		final Graphics graphic = new Graphics(map, set);
+		final MyGraphics graphic = new MyGraphics(map, set);
 		// Layout<V, E>, VisualizationComponent<V,E>
-		final Layout<Menu, Edge> layout = 
-				new RadialTreeLayout<Menu, Edge>(graphic.getForest());
+		final Layout<Menu, Edge> layout = null;
+//				new RadialTreeLayout<Menu, Edge>(graphic.getForest());
 		
 		
 //		layout.setSize(new Dimension(600,600));
