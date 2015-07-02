@@ -165,7 +165,7 @@ public class InformationCreator {
             	final SessionLine sl = new SessionLine(line);
             	x.add(sl);
             	line = br.readLine();
-            	if(count > 10000) {
+            	if(count > 10000000) {
             		break einlesen;
             	}
             	count++;
@@ -226,7 +226,7 @@ public class InformationCreator {
 		
 		@Override
 		public String toString() {
-			return name+(null == parentNode ? "" : " von " + parentNode);
+			return name;
 		}
 
 		public BigDecimal getSize() {
