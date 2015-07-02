@@ -3,7 +3,6 @@ package majo.mapreduce;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -42,9 +41,13 @@ public class UserSessionJob {
 	 */
 	public static class UserValueMapper extends Mapper<Object, Text, Text, UserSession> {
 
+//		/** der Programmfilter */
+//		public static final String FILTER_PRG = 
+//				"(GH)|(KND_BUHA)|(LIEF_BUHA)";
+		
 		/** der Programmfilter */
 		public static final String FILTER_PRG = 
-				"(GH)|(KND_BUHA)|(LIEF_BUHA)";
+				"GH";
 		
 		@Override
 		public void map(
@@ -63,8 +66,7 @@ public class UserSessionJob {
 			final String prg = line.getCleanProgram();
 			// Falls bestimmte Programme von der Auswertung ausgeschlossen werden sollen
 			if (acceptProgram(prg)) {
-				final String usernameTmp = line.getUser();
-				final String username = (null == usernameTmp ? null : usernameTmp.toLowerCase(Locale.GERMAN));
+				final String username = line.getCleanUser();
 				// Falls eine Auswertung zu einem spezifischen Benutzer gemacht werden soll
 				if (null == filterUser || filterUser.equals(username)) {
 					final Calendar cal = line.getDateTime();

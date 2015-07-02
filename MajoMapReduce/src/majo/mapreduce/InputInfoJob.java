@@ -19,6 +19,10 @@ import org.apache.hadoop.mapreduce.Reducer;
  */
 public class InputInfoJob {
 
+	/** der Programmfilter */
+	public static final String FILTER_PRG = 
+			"GH";
+	
 	/**
 	 * Interpretiert eine MenulogLine und weist jeweils eine Benutzerzeile
 	 * zu einer Eins sowie einer Kombination aus 
@@ -43,12 +47,29 @@ public class InputInfoJob {
 				final Object key, final Text value, final Context context) 
 						throws IOException, InterruptedException {
 			final MenulogLine line = new MenulogLine(value.toString());
-			// Benutzer
-			word.set("USER[" + line.getUser() + "]");
-			context.write(word, one);
-			// Auswahl
-			word.set("VALUE[" + line.getCleanProgram() + "~" + line.getCleanValue() + "]");
-			context.write(word, one);
+			final String prg = line.getCleanProgram();
+			if (acceptProgram(prg)) {
+				// Benutzer
+				word.set("USER[" + line.getCleanUser() + "]");
+				context.write(word, one);
+				// Auswahl
+				word.set("VALUE[" + prg + "~" + line.getCleanValue() + "]");
+				context.write(word, one);
+			}
+		}
+		
+		/**
+		 * Liefert <code>true</code> wenn {@code prg} einem gesuchten 
+		 * Programmnamen entspricht.
+		 * @param prg ein Programmname
+		 * @return <code>true</code> wenn gesucht
+		 */
+		public boolean acceptProgram(final String prg) {
+			boolean match = false;
+			if (null != prg) {
+				match = prg.toUpperCase().matches(FILTER_PRG);
+			}
+			return match;
 		}
 
 	}

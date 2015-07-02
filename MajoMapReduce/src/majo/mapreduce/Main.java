@@ -12,6 +12,8 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.compress.BZip2Codec;
+import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -38,12 +40,12 @@ public class Main {
 		// Konfiguration
 		final JobConf conf = new JobConf();
 //		conf.set(MENULOG_FILTER_USERNAME, "10");
-		conf.setInt(MENULOG_MINUTES_MAX, 240);
+//		conf.setInt(MENULOG_MINUTES_MAX, 240);
 		int code = 0;
 
 		// Aktiviert die Komprimierung der Ergebnis-Datei
-//		conf.setBoolean("mapreduce.output.fileoutputformat.compress", true);
-//		conf.setClass("mapreduce.output.fileoutputformat.compress.codec", BZip2Codec.class, CompressionCodec.class);
+		conf.setBoolean("mapreduce.output.fileoutputformat.compress", true);
+		conf.setClass("mapreduce.output.fileoutputformat.compress.codec", BZip2Codec.class, CompressionCodec.class);
 		
 		
 		// Job 1 anlegen/ausführen

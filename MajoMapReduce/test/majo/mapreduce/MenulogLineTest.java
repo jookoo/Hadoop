@@ -1,6 +1,6 @@
 package majo.mapreduce;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -84,7 +84,7 @@ public class MenulogLineTest {
 		final MenulogLine x = new MenulogLine(LINE1);
 		System.out.println(x);
 		assertEquals(CAL, x.getDateTime());
-		assertEquals("21", x.getUser());
+		assertEquals("21", x.getCleanUser());
 		assertEquals("Eine Auswahl", x.getValue());
 	}
 
@@ -93,7 +93,7 @@ public class MenulogLineTest {
 		final MenulogLine x = new MenulogLine(LINE2);
 		System.out.println(x);
 		assertEquals(CAL, x.getDateTime());
-		assertEquals("21", x.getUser());
+		assertEquals("21", x.getCleanUser());
 		assertEquals("Eine Auswahl", x.getValue());
 	}
 

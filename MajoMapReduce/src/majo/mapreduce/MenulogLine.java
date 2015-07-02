@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
  * 2. die Uhrzeit des Eintrags
  * 3. den Benutzer der den Eintrag zu verantworten hat, referenziert über einen zweistelligen Code
  * 4. die Ausführbare Datei mit der der Eintrag erzeugt wurde
- * 5.
+ * 5. ohne Funktion
  * 6. der Name des gewählten Menüpunkts
  * 7. der aktuelle Funktionsstack im alten ERP-Programm
  * </pre>
@@ -79,6 +79,9 @@ public class MenulogLine {
 	/** Benutzerkürzel */
 	private final String user;
 
+	/** bereinigtes Benutzerkürzel */
+	private String cleanUser;
+	
 	/** Pfad zum Programm */
 	private final String program;
 
@@ -90,6 +93,7 @@ public class MenulogLine {
 
 	/** bereinigte Auswahl vom benutzer */
 	private final String cleanValue;
+
 
 	/**
 	 * Erstellt ein Objekt mit den Werten von {@code line}.
@@ -105,10 +109,27 @@ public class MenulogLine {
 		}
 		date = createDate(tokens[0], tokens[1]);
 		user = tokens[2];
+		cleanUser = cleanupUser(user);
 		program = tokens[3];
 		cleanProgram = cleanupProgram(program);
 		value = tokens[5];
 		cleanValue = cleanupValue(value);
+	}
+
+	/**
+	 * Die Zeichekette wird in Großbuchstaben geschrieben.
+	 * In einem weiteren Schritt muss die Benutzerzordnung über ini-Dateien
+	 * passieren.
+	 * @param x der Benutzername
+	 * @return ein Objekt, niemals <code>null</code>
+	 */
+	private String cleanupUser(final String x) {
+		String y = null;
+		if (null != x) {
+			y = x.toUpperCase();
+		}
+		// Auflösen per User.ini
+		return y;
 	}
 
 	/**
@@ -193,6 +214,14 @@ public class MenulogLine {
 		return user;
 	}
 
+	/**
+	 * Liefert den Benutzer in bereinigter Form.
+	 * @return ein Objekt, niemals <code>null</code>
+	 */
+	public String getCleanUser() {
+		return cleanUser;
+	}
+	
 	/**
 	 * Liefert den Programmpfad, mit dem die Zeile erstellt wurde.
 	 * @return ein Objekt, niemals <code>null</code>

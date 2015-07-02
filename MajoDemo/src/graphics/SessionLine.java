@@ -136,7 +136,6 @@ public class SessionLine {
 	 * @return
 	 */
 	public List<Edge> getEdges() {
-		final Set<Menu> menus = new LinkedHashSet<>();
 		final List<Edge> edges = new LinkedList<>();
 		String from = null;
 		String to = null;

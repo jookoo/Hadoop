@@ -105,7 +105,6 @@ public class InformationCreator {
 				e.addWeight();
 			}
 		}
-		System.out.println("different Edges " +  x.size());
 		return x;
 	}
 	
@@ -166,7 +165,7 @@ public class InformationCreator {
             	final SessionLine sl = new SessionLine(line);
             	x.add(sl);
             	line = br.readLine();
-            	if(count > 100000) {
+            	if(count > 10000) {
             		break einlesen;
             	}
             	count++;
@@ -331,7 +330,7 @@ public class InformationCreator {
 		
 		@Override
 		public int hashCode() {
-			final int prime = 1009;
+			final int prime = 1063;
 			int hashCode = prime * getName().hashCode();
 			hashCode = hashCode + getFrom().hashCode();
 			hashCode = hashCode + getTo().hashCode();
