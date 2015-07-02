@@ -105,6 +105,7 @@ public class InformationCreator {
 				e.addWeight();
 			}
 		}
+		System.out.println("different Edges " +  x.size());
 		return x;
 	}
 	
@@ -165,7 +166,7 @@ public class InformationCreator {
             	final SessionLine sl = new SessionLine(line);
             	x.add(sl);
             	line = br.readLine();
-            	if(count > 10000000) {
+            	if(count > 100000) {
             		break einlesen;
             	}
             	count++;

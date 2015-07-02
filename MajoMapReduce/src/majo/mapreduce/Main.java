@@ -57,6 +57,10 @@ public class Main {
 		// Job 3 anlegen/ausführen
 		final Job userSessionJob = createUserSessionJob(conf);
 		code += (userSessionJob.waitForCompletion(true) ? 0 : 1);
+		
+		// Job 3 anlegen/ausführen
+		final Job sessionOverviewJob = createSessionOverviewJob(conf);
+		code += (userSessionJob.waitForCompletion(true) ? 0 : 1);
 
 		// Ausführung abwarten
 		System.exit(code);
@@ -167,6 +171,35 @@ public class Main {
 		// Output-Pfad
 		FileOutputFormat.setOutputPath(job, new Path("/user_session"));
 
+		return job;
+	}
+	
+	private static Job createSessionOverviewJob(final JobConf conf) throws IOException {
+		final Job job = Job.getInstance(conf, 
+				UserSessionJob.class.getSimpleName());
+		job.setJarByClass(UserSessionJob.class);
+
+		//Input-Pfad
+		FileInputFormat.addInputPath(job, new Path("/input/*.CSV"));
+
+		// Mapper-Output
+		job.setMapOutputKeyClass(Text.class);
+		job.setMapOutputValueClass(UserSession.class);
+
+		// Mappper + Combiner
+		job.setMapperClass(UserValueMapper.class);
+		job.setCombinerClass(SessionReducer.class);
+
+		// Reducer
+		job.setReducerClass(SessionReducer.class);
+
+		// Output
+		job.setOutputKeyClass(Text.class);
+		job.setOutputValueClass(UserSession.class);
+
+		// Output-Pfad
+		FileOutputFormat.setOutputPath(job, new Path("/user_session"));
+		
 		return job;
 	}
 
