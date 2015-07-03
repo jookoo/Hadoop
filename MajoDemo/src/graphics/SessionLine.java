@@ -6,14 +6,12 @@ import graphics.InformationCreator.Menu;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * Repräsentiert eine Zeile in der user_session.txt.
@@ -26,6 +24,7 @@ import java.util.Set;
  */
 public class SessionLine {
 
+	/** maximaler Index der Session-Line-Tokens */
 	private static final int INDEX_MAX = 2;
 	
 	/** die Startseiten */
@@ -61,19 +60,25 @@ public class SessionLine {
 		STARTPAGES.add("W Nachlieferung");
 	}
 	
-	
-	
-	
 	/** Benutzerkürzel */
 	private final String user;
 	
 	/** Tag/Uhrzeit der Aktion */
 	private final Calendar date;
 	
-	/** Menuaufrufe */
+	/** Menuaufrufe der Sessionline sortiert nach Zeitstempel (TreeSet) */
 	private final Map<Long,String> map;
 	
+	/** Die Menüpunkte extrahiert aus der Session */
+	private final Set<Menu> menus = new LinkedHashSet<Menu>();
 	
+	/** Die Kanten extrahiert aus der Session */
+	private final Set<Edge> edges = new LinkedHashSet<Edge>();
+	
+	/**
+	 * ein Konstruktor.
+	 * @param line die Zeile in der Ergebnis-Datei des User-Session-Jobs
+	 */
 	public SessionLine(final String line) {
 		Objects.requireNonNull(line);
 		final int trenner = line.indexOf("[") - 1;
@@ -89,8 +94,14 @@ public class SessionLine {
 		user = tokens[0];
 		date = createDate(tokens[1]);
 		map = createMap(menuHits);
+		analyze();
 	}
 	
+	/**
+	 * Erzeugt einen Kalender mit entsprechend voreingestellten Werten.
+	 * @param yyyymmddhhMMss das Datum als Zeichenkette
+	 * @return ein Objekt, niemals <code>null</code>
+	 */
 	private Calendar createDate(final String yyyymmddhhMMss) {
 		final String[] split = yyyymmddhhMMss.split(" ");
 		final String yyyymmdd = split[0];
@@ -107,8 +118,13 @@ public class SessionLine {
 		return cal;
 	}
 	
+	/**
+	 * Baut eine Map mit den <Zeitpunkt, Menüpunkt> auf.
+	 * @param input die bereits unterteile Zeile
+	 * @return ein Objekt niemals <code>null</code>
+	 */
 	private Map<Long, String> createMap(final String input) {
-		final Map<Long, String> map = new LinkedHashMap<>();
+		final Map<Long, String> map = new TreeMap<>();
 		if (null != input && 0 < input.length()) {
 			final String[] tokens = input.split("\\[");
 			for (final String s: tokens) {
@@ -123,61 +139,54 @@ public class SessionLine {
 		return map;
 	}
 	
+	/**
+	 * Liefert die Map mit Menüpunkten.
+	 * @return ein Objekt, niemals <code>null</code>
+	 */
 	public Map<Long, String> getMap() {
 		return map;
 	}
 
-	public String createEdgeName() {
-		return null;
-	}
-
 	/**
-	 * Geht entlang einer Session und baut Flanken zwischen den Menüpunkten auf.
-	 * @return
+	 * Ermittelt Menüpunkte und Kanten für die gegebenen Daten der einzelnen
+	 * Zeile.
 	 */
-	public List<Edge> getEdges() {
-		final List<Edge> edges = new LinkedList<>();
+	private void analyze() {
 		String from = null;
 		String to = null;
+		Menu lastmenu = null;
 		for (final Entry<Long, String> entry: map.entrySet()) {
 			if (null == from) {
 				from = entry.getValue();
+				lastmenu = new Menu(from, null);
+				menus.add(lastmenu);
 			} else {
 				to = entry.getValue();
 				final Edge edge = new Edge();
-				final Menu f = new Menu(from, null);
 				final Menu t = new Menu(to, from);
-				edge.add(f);
+				menus.add(t);
+				edge.add(lastmenu);
 				edge.add(t);
 				edges.add(edge);
 				from = to;
+				lastmenu = t;
 			}
 		}
-		return edges;
+	}
+
+	/**
+	 * Liefert die Menüpunkte der Session.
+	 * @return ein Objekt, niemals <code>null</code>
+	 */
+	public Set<Menu> getMenu() {
+		return menus;
 	}
 	
 	/**
-	 * Geht entlang einer Session und baut die Menüpunkte auf.
-	 * @return
+	 * Liefert die Kanten der Session.
+	 * @return ein Objekt, niemals <code>null</code>
 	 */
-	public Set<Menu> getMenus() {
-		final Set<Menu> menus = new LinkedHashSet<>();
-		String from = null;
-		String to = null;
-		for (final Entry<Long, String> entry: map.entrySet()) {
-			if (null == from) {
-				from = entry.getValue();
-				final Menu m = new Menu(from, null);
-				menus.add(m);
-			} else {
-				to = entry.getValue();
-				final Menu m = new Menu(to, from);
-				if (!menus.contains(m)) {
-					menus.add(m);
-				}
-				from = to;
-			}
-		}
-		return menus;
+	public Set<Edge> getEdge() {
+		return edges;
 	}
 }

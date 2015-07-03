@@ -4,8 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,11 +14,9 @@ import java.util.Set;
 
 public class InformationCreator {
 
-	private final Set<SessionLine> sessions = new LinkedHashSet<>();
-	
 	private final Set<InfoLine> infos = new LinkedHashSet<>();
 	
-	private final Set<Menu> sizes = new HashSet<>();
+	private final Set<Menu> sizes = new LinkedHashSet<>();
 	
 	private final Set<Edge> weightedEdges = new LinkedHashSet<>();
 	
@@ -28,25 +25,24 @@ public class InformationCreator {
 	
 	public void digest(final String filename) {
 		if (null != filename && filename.contains("user_session.txt")) {
-			sessions.addAll(createSessionLines(filename));
-			calculateEdgeweight();
-			calculateSizes();
+			final Set<SessionLine> sessions = createSessionLines(filename);
+			calculateEdgeweight(sessions);
+			calculateSizes(sessions);
 		} else {
 			infos.addAll(createInfoLines(filename));
 		}
-		
-		
 	}
 	
-	private void calculateSizes() {
+	private void calculateSizes(final Set<SessionLine> sessions) {
+		final Set<Menu> sessionMenu = createSessionMenues(sessions);
 		double sum = 0D;
-		for (final Menu e: getSessionMenues()) {
+		for (final Menu e: sessionMenu) {
 			sum = sum + e.getWeight();
 		}
 		if (0D == sum) {
 			sum = 1D;
 		}
-		for (final Menu m: getSessionMenues()) {
+		for (final Menu m: sessionMenu) {
 			final BigDecimal count = new BigDecimal(m.getWeight());
 			final BigDecimal bdsum = new BigDecimal(sum);
 			final BigDecimal bd100 = new BigDecimal(100);
@@ -57,16 +53,17 @@ public class InformationCreator {
 		}
 	}
 	
-	private void calculateEdgeweight() {
+	private void calculateEdgeweight(final Set<SessionLine> sessions) {
+		final Set<Entry<String, Edge>> x = createSessionEdges(sessions).entrySet();
 		double sum = 0D;
-		for (final Entry<String, Edge> entry: getSessionEdges().entrySet()) {
+		for (final Entry<String, Edge> entry: x) {
 			final Edge e = entry.getValue();
 			sum = sum + e.getWeight();
 		}
 		if (0D == sum) {
 			sum = 1D;
 		}
-		for (final Entry<String, Edge> entry: getSessionEdges().entrySet()) {
+		for (final Entry<String, Edge> entry: x) {
 			final Edge e = entry.getValue();
 			final int d = e.getWeight();
 			final double percantage = d / (sum / 100);
@@ -83,19 +80,14 @@ public class InformationCreator {
 		return weightedEdges;
 	}
 
-	public Set<SessionLine> getSessions() {
-		return sessions;
-	}
-	
 	public Set<InfoLine> getInfos() {
 		return infos;
 	}
 	
-	
-	public Map<String, Edge> getSessionEdges() {
-		final Map<String, Edge> x = new HashMap<>();
+	public Map<String, Edge> createSessionEdges(final Set<SessionLine> sessions) {
+		final Map<String, Edge> x = new LinkedHashMap<>();
 		for(final SessionLine sl: sessions) {
-			final List<Edge> edges = sl.getEdges();
+			final Set<Edge> edges = sl.getEdge();
 			for (final Edge tmp: edges) {
 				final String name = tmp.getName();
 				if (!x.containsKey(name)) {
@@ -108,10 +100,21 @@ public class InformationCreator {
 		return x;
 	}
 	
-	public Set<Menu> getSessionMenues() {
-		final Set<Menu> x = new HashSet<>();
+	public Map<String, Edge> createSessionEdgesNoLoops(final Set<SessionLine> sessions) {
+		final Map<String, Edge> x = createSessionEdges(sessions);
+		for (final Entry<String, Edge> entry: x.entrySet()) {
+			final Edge e = entry.getValue();
+			if (e.getFrom() == e.getTo()) {
+				x.remove(entry);
+			}
+		}
+		return x;
+	}
+	
+	public Set<Menu> createSessionMenues(final Set<SessionLine> sessions) {
+		final Set<Menu> x = new LinkedHashSet<>();
 		for(final SessionLine sl: sessions) {
-			final Set<Menu> menues = sl.getMenus();
+			final Set<Menu> menues = sl.getMenu();
 			for (final Menu tmp: menues) {
 				if (!x.contains(tmp)) {
 					x.add(tmp);
@@ -122,6 +125,16 @@ public class InformationCreator {
 						break addweight;
 					}
 				}
+			}
+		}
+		return x;
+	}
+	
+	public Set<Menu> createSessionMenusNoLoops(final Set<SessionLine> sessions) {
+		final Set<Menu> x = createSessionMenues(sessions);
+		for (final Menu m: x) {
+			if (null != m.getParentNode() && m.getParentNode().equals(m.getName())) {
+				x.remove(m);
 			}
 		}
 		return x;
@@ -195,12 +208,12 @@ public class InformationCreator {
 	 * Ein Menüpunkt, mit Anzahl an Aufrufen und Ebene 
 	 *
 	 */
-	protected static class Menu {
+	public static class Menu implements Comparable<Menu>{
 
 		private final String name;
 		private final String parentNode;
 		private BigDecimal size = BigDecimal.ONE;
-		private int weight = 1; 
+		private int weight = 0; 
 		
 		
 		public Menu(final String name, final String parentNode) {
@@ -226,7 +239,7 @@ public class InformationCreator {
 		
 		@Override
 		public String toString() {
-			return name;
+			return name+(null == parentNode ? "":" "+ parentNode);
 		}
 
 		public BigDecimal getSize() {
@@ -267,6 +280,24 @@ public class InformationCreator {
 			}
 			return this.hashCode() == obj.hashCode();
 		}
+
+		@Override
+		public int compareTo(final Menu o) {
+			System.out.println(name + " other name "+ o.name);
+			int x = name.compareTo(o.name);
+			if (x == 0) {
+				if (null == parentNode && null != o.parentNode) {
+					x = 1;
+				} else if (null != parentNode && null == o.parentNode) {
+					x = -1;
+				} else if (null == parentNode && null == o.parentNode) {
+					x = 0;
+				} else {
+					x = parentNode.compareTo(parentNode);
+				}
+			}
+			return x;
+		}
 	}
 	
 	/**
@@ -275,12 +306,12 @@ public class InformationCreator {
 	 * Die Dicke entscheidet über die Häufigkeit der Nutzung
 	 *
 	 */
-	protected static class Edge {
+	public static class Edge {
 		
 		private final List<Menu> connectedVertex = new LinkedList<>();
 		
 		/** Gewicht der Kante, bestimmt durch Häufigkeit der Nutzung */
-		private int weight = 1;
+		private int weight = 0;
 		
 		/** Prozentuale Größe gegenüber allen bekannten Kanten */
 		private float thickness = 0f;
@@ -326,6 +357,11 @@ public class InformationCreator {
 			x.append(" --> ");
 			x.append(getTo().getName());
 			return x.toString();
+		}
+		
+		@Override
+		public String toString() {
+			return getName();
 		}
 		
 		@Override

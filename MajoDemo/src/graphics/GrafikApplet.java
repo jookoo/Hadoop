@@ -67,10 +67,19 @@ import edu.uci.ics.jung.visualization.util.Animator;
 import graphics.InformationCreator.Edge;
 import graphics.InformationCreator.Menu;
 
+/**
+ * Die Darstellung der Ergebnisse aus den MapReduce-Jobs zur Auswertung von
+ * Menülog-Dateien.
+ * 
+ * @author joshua.kornfeld@bur-kg.de
+ *
+ */
 public class GrafikApplet extends JApplet {
 
+	/** das Input-Info-Job-Ergebniss */
 	private static final String FILENAME_INFO = "C:\\input_info.txt";
 
+	/** das User-Session-Job-Ergebniss */
 	private static final String FILENAME_SESSION = "C:\\user_session.txt";
 
 	/**
@@ -104,19 +113,20 @@ public class GrafikApplet extends JApplet {
 		frame.setVisible(true);
 	}
 
+	public GrafikApplet() {
+		this(FILENAME_INFO,FILENAME_SESSION);
+	}
+	
 	/**
 	 * Ein Konstruktor
 	 */
-	public GrafikApplet() {
-
-		// create a simple graph for the demo
+	public GrafikApplet(final String path_info, final String path_session) {
 
 		final InformationCreator creator = new InformationCreator();
 
-		creator.digest(FILENAME_INFO);
-		creator.digest(FILENAME_SESSION);
+		creator.digest(path_info);
+		creator.digest(path_session);
 
-		// der Vertex muss Layer haben...
 		final Set<Edge> set = creator.getWeightedEdges();
 		final Set<Menu> map = creator.getSizedMenues();
 
@@ -131,11 +141,7 @@ public class GrafikApplet extends JApplet {
 		radialLayout.setSize(new Dimension(1000,1000));
 		vv =  new VisualizationViewer<Menu,Edge>(treeLayout, new Dimension(1000,1000));
 		vv.setBackground(Color.white);
-		// add a listener for ToolTips
-		vv.setVertexToolTipTransformer(new ToStringLabeller());
-		vv.getRenderContext().setArrowFillPaintTransformer(new ConstantTransformer(Color.lightGray));
 		rings = new Rings();
-
 		final Container content = getContentPane();
 		final JTabbedPane tpane = new JTabbedPane();
 		final JPanel mpane = new MpunktePanel(creator.getInfos());
@@ -292,7 +298,8 @@ public class GrafikApplet extends JApplet {
 
 			vv.getRenderContext().setEdgeDrawPaintTransformer(edgePaint);
 			vv.getRenderContext().setEdgeStrokeTransformer(edgeStroke);
-
+			vv.setVertexToolTipTransformer(new ToStringLabeller());
+			vv.getRenderContext().setArrowFillPaintTransformer(new ConstantTransformer(Color.lightGray));
 
 			// Show vertex and edge labels
 			vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller());

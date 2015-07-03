@@ -50,7 +50,6 @@ public class MyGraphics {
 		STARTPAGES.add("V Fremprogramme");
 		STARTPAGES.add("W Nachlieferung");
 	}
-	
 
 	private final Graph<Menu, Edge> g = new DirectedSparseMultigraph<Menu, Edge>();
 
@@ -58,36 +57,42 @@ public class MyGraphics {
 
 	private final Set<Edge> set;
 
-	private final MyDelegateForest<Menu,Edge> mTree;
+	private final DelegateForest<Menu,Edge> mTree;
 
 	public MyGraphics(final Set<Menu> vertecis, final Set<Edge> set) {
 		this.vertecis = vertecis;
 		this.set = set;
-		mTree = new MyDelegateForest<Menu, Edge>();
+		mTree = new DelegateForest<Menu, Edge>();
 
-//		// das hier dürfte nicht sein
-//		for (final Menu n : vertecis) {
-//			mTree.addVertex(n);
-//		}
-		createStartpages(mTree);
+		for (final Menu n : vertecis) {
+			mTree.addVertex(n);
+		}
 		for (final Edge e : set) {
 			Menu from = null;
 			for (final Menu m : vertecis) {
 				if (m.getName().equals(e.getFrom().getName())) {
-					from = m;
+					if (null == m.getParentNode() && null == e.getFrom().getParentNode() 
+							 || null != m.getParentNode() && m.getParentNode().equals(e.getFrom().getParentNode())) {
+						from = m;
+						break;
+					}
 				}
 			}
 			Menu to = null;
 			for (final Menu m : vertecis) {
 				if (m.getName().equals(e.getTo().getName())) {
-					to = m;
+					if (null != m.getParentNode() && null == e.getTo().getParentNode() 
+							|| null != m.getParentNode() && m.getParentNode().equals(e.getTo().getParentNode())) {
+						to = m;
+						break;
+					}
 				}
 			}
 			mTree.addEdge(e, from, to);
 		}
 	}
 
-	private void createStartpages(final MyDelegateForest<Menu, Edge> mTree) {
+	private void createStartpages(final MyOverviewDelegateForest<Menu, Edge> mTree) {
 		for (final String s: STARTPAGES) {
 			mTree.addVertex(new Menu(s,null));
 		}
@@ -97,7 +102,10 @@ public class MyGraphics {
 		return mTree;
 	}
 
-	public static class MyDelegateForest<V,E> extends DelegateForest<V,E> {
+	/**
+	 * Der Delegator ignoriert Loops und Sessions ohne Wurzelknoten.
+	 */
+	public static class MyOverviewDelegateForest<V,E> extends DelegateForest<V,E> {
 		
 		@Override
 		public boolean addEdge(final E e, final V v1, final V v2) {

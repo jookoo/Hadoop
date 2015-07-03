@@ -1,4 +1,6 @@
-package graphics;
+package test;
+
+import graphics.InfoLine;
 
 import org.junit.Test;
 
