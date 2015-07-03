@@ -19,7 +19,6 @@ import java.awt.event.ItemListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -41,18 +40,13 @@ import javax.swing.JToggleButton;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
-import org.apache.commons.collections15.Factory;
 import org.apache.commons.collections15.Transformer;
 import org.apache.commons.collections15.functors.ConstantTransformer;
 
 import edu.uci.ics.jung.algorithms.layout.PolarPoint;
 import edu.uci.ics.jung.algorithms.layout.RadialTreeLayout;
 import edu.uci.ics.jung.algorithms.layout.TreeLayout;
-import edu.uci.ics.jung.graph.DelegateTree;
-import edu.uci.ics.jung.graph.DirectedGraph;
-import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Forest;
-import edu.uci.ics.jung.graph.Tree;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.Layer;
 import edu.uci.ics.jung.visualization.VisualizationServer;
@@ -61,11 +55,12 @@ import edu.uci.ics.jung.visualization.control.CrossoverScalingControl;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ScalingControl;
-import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
+import edu.uci.ics.jung.visualization.decorators.EdgeShape;
 import edu.uci.ics.jung.visualization.layout.LayoutTransition;
 import edu.uci.ics.jung.visualization.util.Animator;
 import graphics.InformationCreator.Edge;
 import graphics.InformationCreator.Menu;
+import graphics.InformationCreator.Weights;
 
 /**
  * Die Darstellung der Ergebnisse aus den MapReduce-Jobs zur Auswertung von
@@ -82,26 +77,24 @@ public class GrafikApplet extends JApplet {
 	/** das User-Session-Job-Ergebniss */
 	private static final String FILENAME_SESSION = "C:\\user_session.txt";
 
-	/**
-	 * the graph
-	 */
-	Forest<Menu,Edge> graph;
+	/** die Grafik */
+	private final Forest<Menu,Edge> graph;
+
+	/** die Darstellung der Grafik */
+	private final VisualizationViewer<Menu,Edge> vv;
+
+	/** die Ringe zur Visualisierung der Ebenen-Tiefe */
+	private final VisualizationServer.Paintable rings;
+
+	/** ein Baumlayout */
+	private final TreeLayout<Menu,Edge> treeLayout;
+
+	/** ein radiales Baumlayout */
+	private final RadialTreeLayout<Menu,Edge> radialLayout;
 
 	/**
-	 * the visual component and renderer for the graph
-	 */
-	VisualizationViewer<Menu,Edge> vv;
-
-	VisualizationServer.Paintable rings;
-
-	String root;
-
-	TreeLayout<Menu,Edge> treeLayout;
-
-	RadialTreeLayout<Menu,Edge> radialLayout;
-
-	/**
-	 * a driver for this demo
+	 * die Methode zur Ausführung
+	 * @param args
 	 */
 	public static void main(final String[] args) {
 		final JFrame frame = new JFrame("Nutzung des B+R Systems");
@@ -113,6 +106,9 @@ public class GrafikApplet extends JApplet {
 		frame.setVisible(true);
 	}
 
+	/**
+	 * ein parameterloser Konstruktor für den Aufruf durch das Applet
+	 */
 	public GrafikApplet() {
 		this(FILENAME_INFO,FILENAME_SESSION);
 	}
@@ -122,25 +118,24 @@ public class GrafikApplet extends JApplet {
 	 */
 	public GrafikApplet(final String path_info, final String path_session) {
 
+		// ein Daten-Verarbeitungsinstanz
 		final InformationCreator creator = new InformationCreator();
 
+		// Eingabe der Dateien
 		creator.digest(path_info);
 		creator.digest(path_session);
 
+		// Ausgabe der verarbeiteten Dateien
 		final Set<Edge> set = creator.getWeightedEdges();
 		final Set<Menu> map = creator.getSizedMenues();
 
 		// Grafik
-		final MyGraphics graphic = new MyGraphics(map, set);
-		// Layout<V, E>, VisualizationComponent<V,E>
-
+		final MyTreeBuilder graphic = new MyTreeBuilder(map, set);
 		graph = graphic.getForest();
-
 		treeLayout = new TreeLayout<Menu,Edge>(graph);
 		radialLayout = new RadialTreeLayout<Menu,Edge>(graph);
 		radialLayout.setSize(new Dimension(1000,1000));
 		vv =  new VisualizationViewer<Menu,Edge>(treeLayout, new Dimension(1000,1000));
-		vv.setBackground(Color.white);
 		rings = new Rings();
 		final Container content = getContentPane();
 		final JTabbedPane tpane = new JTabbedPane();
@@ -153,10 +148,17 @@ public class GrafikApplet extends JApplet {
 		content.add(tpane);
 	}
 
+	/**
+	 * Repräsentiert die Ringe die die Ebenentiefe des Menüpunkts wiederspiegeln.
+	 */
 	private class Rings implements VisualizationServer.Paintable {
 
-		Collection<Double> depths;
+		/** tiefe des Rings */
+		private final Collection<Double> depths;
 
+		/**
+		 *  ein Konstruktor
+		 */
 		public Rings() {
 			depths = getDepths();
 		}
@@ -193,6 +195,9 @@ public class GrafikApplet extends JApplet {
 		}
 	}
 
+	/**
+	 * Die anzeigende Komponente für die Tabelle mit Menüpunkten
+	 */
 	private static class MpunktePanel extends JPanel {
 
 		public MpunktePanel(final Set<InfoLine> infos) {
@@ -218,6 +223,9 @@ public class GrafikApplet extends JApplet {
 
 	}
 
+	/**
+	 * Die anzeigende Komponente für die Tabelle mit Mitarbeitern
+	 */
 	private static class WorkerPanel extends JPanel {
 
 		public WorkerPanel(final Set<InfoLine> infos) {
@@ -243,6 +251,9 @@ public class GrafikApplet extends JApplet {
 
 	}
 
+	/**
+	 * Die anzeigende Komponente für die Grafik
+	 */
 	private static class GfxPanel extends JPanel {
 
 		public GfxPanel(final VisualizationViewer<Menu, Edge> vv,
@@ -250,32 +261,55 @@ public class GrafikApplet extends JApplet {
 				final TreeLayout<Menu,Edge> treeLayout,
 				final RadialTreeLayout<Menu,Edge> radialLayout) {
 			setLayout(new BorderLayout(0,0));
-
-			// Transformer maps the vertex number to a vertex property
+			// Hintergrund
+			vv.setBackground(Color.white);
+			
+			// Label
+			vv.getRenderContext().setVertexLabelTransformer(new Transformer<Menu, String>() {
+	            @Override
+				public String transform(final Menu e) {
+	                return (e.getName());
+	            }
+	        });
+			// Darstellung
 			final Transformer<Menu,Paint> vertexColor = new Transformer<Menu, Paint>() {
 				@Override
 				public Paint transform(final Menu m) {
 					if(m.isStartpage()) {
-						return Color.GREEN;
+						return Color.BLACK;
 					} else {
-						return Color.RED;
+						if (m.getWeight() < 100) {
+							return Color.RED;
+						} else {
+							return Color.GREEN;
+						}
 					}
 				}
 			};
-
+			// Größe der Vertices anhand der absoluten Anzahl der Nutzungen setzen
 			final Transformer<Menu,Shape> vertexSize = new Transformer<Menu, Shape>(){
 				@Override
 				public Shape transform(final Menu m){
 					final Ellipse2D circle = new Ellipse2D.Double(-15, -15, 30, 30);
-					final BigDecimal percentage = m.getSize();
-					return AffineTransform.getScaleInstance(percentage.floatValue(), percentage.floatValue()).createTransformedShape(circle);
+					final Weights w = m.getStagedSize();
+					return AffineTransform.getScaleInstance(w.getSize(), w.getSize()).createTransformedShape(circle);
 				}
 			};
-
 			vv.getRenderContext().setVertexFillPaintTransformer(vertexColor);
 			vv.getRenderContext().setVertexShapeTransformer(vertexSize);
+			
+			// Kanten anhand der prozentualen Nutzung vergrößern
+			final Transformer<Edge, Stroke> edgeStroke = new Transformer<Edge, Stroke>() {
+				@Override
+				public Stroke transform(final Edge e) {
+					return new BasicStroke(e.getThickness());
+				}
+			};
+			// Kanten als gerade Linien
+			vv.getRenderContext().setEdgeShapeTransformer(
+					new EdgeShape.Line<Menu,Edge>());
 
-
+			// Kanten anhand der absoluten Anzahl von Nutzungen einfärben
 			final Transformer<Edge, Paint> edgePaint = new Transformer<Edge, Paint>() {
 				@Override
 				public Paint transform(final Edge e) {
@@ -288,28 +322,31 @@ public class GrafikApplet extends JApplet {
 					return c;
 				}
 			};
-
-			final Transformer<Edge, Stroke> edgeStroke = new Transformer<Edge, Stroke>() {
-				@Override
-				public Stroke transform(final Edge e) {
-					return new BasicStroke(e.getThickness());
-				}
-			};
-
 			vv.getRenderContext().setEdgeDrawPaintTransformer(edgePaint);
 			vv.getRenderContext().setEdgeStrokeTransformer(edgeStroke);
-			vv.setVertexToolTipTransformer(new ToStringLabeller());
-			vv.getRenderContext().setArrowFillPaintTransformer(new ConstantTransformer(Color.lightGray));
-
-			// Show vertex and edge labels
-			vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller());
+			// Tooltips
+			vv.setVertexToolTipTransformer(new Transformer<Menu, String>(){
+			    @Override
+				public String transform(final Menu m) {
+			        return String.format("Prozentualer Anteil: %.2f ",m.getSize());
+			    }
+			});
+			vv.setEdgeToolTipTransformer(new Transformer<Edge,String>(){
+			    @Override
+				public String transform(final Edge e) {
+			        return "Edge:"+e.getWeight();
+			    }
+			});
+			vv.getRenderContext().setArrowFillPaintTransformer(new ConstantTransformer(Color.CYAN));
 
 			// Panel mit Grafik aufbauen
 			final GraphZoomScrollPane panel = new GraphZoomScrollPane(vv);
 			add(panel, BorderLayout.CENTER);
 
+			// Scalierung des Graphen ermöglichen
 			final ScalingControl scaler = new CrossoverScalingControl();
 
+			// Der Button + 
 			final JButton plus = new JButton("+");
 			plus.addActionListener(new ActionListener() {
 				@Override
@@ -317,6 +354,7 @@ public class GrafikApplet extends JApplet {
 					scaler.scale(vv, 1.1f, vv.getCenter());
 				}
 			});
+			// Der Button -
 			final JButton minus = new JButton("-");
 			minus.addActionListener(new ActionListener() {
 				@Override
@@ -325,6 +363,7 @@ public class GrafikApplet extends JApplet {
 				}
 			});
 
+			// Der Buutton um zwischen Tree-Layout und Radial-Tree-Layout zu wechseln
 			final JToggleButton radial = new JToggleButton("Radial");
 			radial.addItemListener(new ItemListener() {
 
@@ -349,6 +388,7 @@ public class GrafikApplet extends JApplet {
 					vv.repaint();
 				}});
 
+			// Mausverhalten instaziieren und festelegen
 			final DefaultModalGraphMouse graphMouse = new DefaultModalGraphMouse();
 			vv.setGraphMouse(graphMouse);
 			final JComboBox modeBox = graphMouse.getModeComboBox();
@@ -368,6 +408,9 @@ public class GrafikApplet extends JApplet {
 
 	}
 
+	/**
+	 * Ein Tabellen-Model für die Anzeige von Info-Zeilen
+	 */
 	private static class InfoTableModel extends DefaultTableModel {
 
 		/** die Spaltendefinition */
@@ -386,6 +429,10 @@ public class GrafikApplet extends JApplet {
 		public InfoTableModel() {
 		}
 
+		/**
+		 * Fügt der Tabelle eine Zeile hinzu
+		 * @param m eine {@link InfoLine}
+		 */
 		public void add(final InfoLine m) {
 			data.add(m);
 		}
@@ -425,11 +472,11 @@ public class GrafikApplet extends JApplet {
 				final InfoLine x = data.get(row);
 				switch (col) {
 				case 0:
-					final String v = x.isWorkerLine() ? x.getUser() : x.getProgram();
+					final String v = x.isWorkerLine() ? x.getUser() : x.getMenu();
 					value = v;
 					break;
 				case 1:
-					final String y = x.isWorkerLine() ? "" : x.getMenu();
+					final String y = x.isWorkerLine() ? x.tranlatedName(): x.getProgram();
 					value = y;
 					break;
 				case 2:
@@ -447,24 +494,9 @@ public class GrafikApplet extends JApplet {
 
 	}
 
-	Factory<DirectedGraph<Menu,Edge>> graphFactory = 
-			new Factory<DirectedGraph<Menu,Edge>>() {
-
-		@Override
-		public DirectedGraph<Menu, Edge> create() {
-			return new DirectedSparseMultigraph<Menu,Edge>();
-		}
-	};
-
-	Factory<Tree<Menu,Edge>> treeFactory =
-			new Factory<Tree<Menu,Edge>> () {
-
-		@Override
-		public Tree<Menu, Edge> create() {
-			return new DelegateTree<Menu,Edge>(graphFactory);
-		}
-	};
-	//unused
+	/**
+	 * Alternativer Renderer für InfoTable-Zellen. 
+	 */
 	private static class InfoTableCellRenderer extends DefaultTableCellRenderer {
 
 		@Override

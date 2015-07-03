@@ -10,27 +10,34 @@ import java.util.Objects;
  */
 public class InfoLine {
 
-	private static final int INDEX_MAX = 1;
-	
+	/** eine Konstante */
 	private static final String PREFIX_USER = "USER";
 	
+	/** eine Konstante */
 	private static final String PREFIX_PATH = "VALUE";
 
+	/** die gezählte Anzahl der Vorkommnisse */
 	private final int count;
 
+	/** liefert ob es sich um eine Zeile mit Benutzerbezug handelt */
 	private boolean userline = true;
 	
+	/** der Benutzer */
 	private String user = null;
 	
+	/** der Programmpfad */
 	private String prg = null;
 	
+	/** das Menü */
 	private String menu = null;
 	
 	
 	/**
+	 * ein Konstruktor.
+	 * <p>
 	 * USER[sy]	1
 	 * VALUE[GH~1. 11 Falschbestellung des Kunden]	5711
-	 * @param line
+	 * @param line die Zeile
 	 */
 	public InfoLine(final String line) {
 		Objects.requireNonNull(line);
@@ -45,6 +52,11 @@ public class InfoLine {
 		}
 	}
 	
+	/**
+	 * Einlesen einer Zeile.
+	 * @param line die Zeile
+	 * @return ein Objekt, niemals <code>null</code>
+	 */
 	final String[] readLine(final String line) {
 		final String[] x;
 		if (line.startsWith(PREFIX_USER)) {
@@ -67,18 +79,34 @@ public class InfoLine {
 		return x;
 	}
 
+	/**
+	 * Liefert den Benutzernamen der Zeile.
+	 * @return ein Objekt oder <code>null</code>
+	 */
 	public String getUser() {
 		return user;
 	}
 
+	/**
+	 * Liefert die gezählte Anzahl der Zeile 
+	 * @return ein Objekt, niemals <code>null</code>
+	 */
 	public Integer getCount() {
 		return count;
 	}
 
+	/**
+	 * Liefert den bereits kumulierten Programmpfad der Zeile.
+	 * @return ein Objekt, niemals <code>null</code>
+	 */
 	public String getProgram() {
 		return prg;
 	}
 
+	/**
+	 * Liefert den Menüeintrag der Zeile.
+	 * @return ein Objekt oder <code>null</code>
+	 */
 	public String getMenu() {
 		return menu;
 	}
@@ -89,6 +117,15 @@ public class InfoLine {
 	 */
 	public boolean isWorkerLine() {
 		return userline;
+	}
+
+	/**
+	 * Liefert den übersetzten Namen des Mitarbeiters
+	 * TODO nocht nicht implementiert.
+	 * @return ein Objekt, niemals <code>null</code>
+	 */
+	public String tranlatedName() {
+		return "";
 	}
 	
 }

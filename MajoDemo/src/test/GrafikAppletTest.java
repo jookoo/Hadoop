@@ -18,7 +18,6 @@ import javax.swing.JFrame;
 /**
  * Prüft die Klasse {@link GrafikApplet}.
  * 
- * 
  * @author joshua.kornfeld@bur-kg.de
  *
  */
@@ -45,6 +44,11 @@ public class GrafikAppletTest {
 	public static final File TEMP_PATH = 
 			new File(System.getProperty("java.io.tmpdir"), "menulog");
 	
+	/**
+	 * Eine ausführbare Methode mit Testdaten.
+	 * @param args nicht genutzt
+	 * @throws IOException bei Fehlern mit den Dateien
+	 */
 	public static void main(final String[] args) throws IOException {
 		final String[] x = createTestFiles();
 		final JFrame frame = new JFrame("Nutzung des B+R Systems");

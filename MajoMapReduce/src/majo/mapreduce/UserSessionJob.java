@@ -187,7 +187,7 @@ public class UserSessionJob {
 					final String menue = e.getValue();
 					if (!ENDPAGES.contains(menue)) {
 						if (cache.isEmpty()) {
-							// neue Sitzung beginnen // geht fälschlicherweise von start mit startpage aus
+							// neue Sitzung beginnen
 							cache.put(Long.valueOf(time), menue);
 							monitor.println("\t\tinit");
 						} else {
