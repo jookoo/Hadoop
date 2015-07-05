@@ -400,47 +400,6 @@ public class GrafikApplet extends JApplet {
 					vv.repaint();
 				}});
 
-			// Auf und zuklappen von Vertecis
-			final JButton collapse = new JButton("Collapse");
-			collapse.addActionListener(new ActionListener() {
-
-				@Override
-				public void actionPerformed(final ActionEvent e) {
-					final Collection picked = new HashSet(vv.getPickedVertexState().getPicked());
-					if(picked.size() == 1) {
-						final Object root = picked.iterator().next();
-						final Forest inGraph = (Forest)vv.getGraphLayout().getGraph();
-
-						try {
-							collapser.collapse(vv.getGraphLayout(), inGraph, root);
-						} catch (final InstantiationException e1) {
-							e1.printStackTrace();
-						} catch (final IllegalAccessException e1) {
-							e1.printStackTrace();
-						}
-
-						vv.getPickedVertexState().clear();
-						vv.repaint();
-					}
-				}});
-
-			final JButton expand = new JButton("Expand");
-			expand.addActionListener(new ActionListener() {
-
-				@Override
-				public void actionPerformed(final ActionEvent e) {
-					final Collection picked = vv.getPickedVertexState().getPicked();
-					for(final Object v : picked) {
-						if(v instanceof Forest) {
-							final Forest inGraph = (Forest)treeLayout.getGraph();
-							collapser.expand(inGraph, (Forest)v);
-						}
-						vv.getPickedVertexState().clear();
-						vv.repaint();
-					}
-				}});
-
-
 			// Mausverhalten instaziieren und festelegen
 			final DefaultModalGraphMouse graphMouse = new DefaultModalGraphMouse();
 			vv.setGraphMouse(graphMouse);
@@ -456,8 +415,6 @@ public class GrafikApplet extends JApplet {
 			controls.add(radial);
 			controls.add(scaleGrid);
 			controls.add(modeBox);
-			controls.add(collapse);
-			controls.add(expand);
 			add(controls, BorderLayout.SOUTH);
 
 		}
