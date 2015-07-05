@@ -57,6 +57,7 @@ import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ScalingControl;
 import edu.uci.ics.jung.visualization.decorators.EdgeShape;
 import edu.uci.ics.jung.visualization.layout.LayoutTransition;
+import edu.uci.ics.jung.visualization.subLayout.TreeCollapser;
 import edu.uci.ics.jung.visualization.util.Animator;
 import graphics.InformationCreator.Edge;
 import graphics.InformationCreator.Menu;
@@ -72,10 +73,10 @@ import graphics.InformationCreator.Weights;
 public class GrafikApplet extends JApplet {
 
 	/** das Input-Info-Job-Ergebniss */
-	private static final String FILENAME_INFO = "C:\\input_info.txt";
+	private static final String FILENAME_INFO = "D:\\input_info.txt";
 
 	/** das User-Session-Job-Ergebniss */
-	private static final String FILENAME_SESSION = "C:\\user_session.txt";
+	private static final String FILENAME_SESSION = "D:\\user_session.txt";
 
 	/** die Grafik */
 	private final Forest<Menu,Edge> graph;
@@ -91,6 +92,9 @@ public class GrafikApplet extends JApplet {
 
 	/** ein radiales Baumlayout */
 	private final RadialTreeLayout<Menu,Edge> radialLayout;
+
+	/** Öfnen/Schließen von Nodes */
+	private final TreeCollapser collapser;
 
 	/**
 	 * die Methode zur Ausführung
@@ -112,7 +116,7 @@ public class GrafikApplet extends JApplet {
 	public GrafikApplet() {
 		this(FILENAME_INFO,FILENAME_SESSION);
 	}
-	
+
 	/**
 	 * Ein Konstruktor
 	 */
@@ -132,8 +136,9 @@ public class GrafikApplet extends JApplet {
 		// Grafik
 		final MyTreeBuilder graphic = new MyTreeBuilder(map, set);
 		graph = graphic.getForest();
-		treeLayout = new TreeLayout<Menu,Edge>(graph);
-		radialLayout = new RadialTreeLayout<Menu,Edge>(graph);
+		collapser = new TreeCollapser();
+		treeLayout = new TreeLayout<Menu,Edge>(graph, 100);
+		radialLayout = new RadialTreeLayout<Menu,Edge>(graph, 100);
 		radialLayout.setSize(new Dimension(1000,1000));
 		vv =  new VisualizationViewer<Menu,Edge>(treeLayout, new Dimension(1000,1000));
 		rings = new Rings();
@@ -141,10 +146,10 @@ public class GrafikApplet extends JApplet {
 		final JTabbedPane tpane = new JTabbedPane();
 		final JPanel mpane = new MpunktePanel(creator.getInfos());
 		final JPanel wpane = new WorkerPanel(creator.getInfos());
-		final JPanel gpane = new GfxPanel(vv,rings,treeLayout,radialLayout);
-		tpane.add("Menüpunkte", mpane);
-		tpane.add("Mitarbeiter", wpane);
-		tpane.add("Grafik", gpane);
+		final JPanel gpane = new GfxPanel(vv,rings,treeLayout,radialLayout,collapser);
+		tpane.add(MpunktePanel.LABEL, mpane);
+		tpane.add(WorkerPanel.LABEL, wpane);
+		tpane.add(GfxPanel.LABEL, gpane);
 		content.add(tpane);
 	}
 
@@ -200,6 +205,8 @@ public class GrafikApplet extends JApplet {
 	 */
 	private static class MpunktePanel extends JPanel {
 
+		public static final String LABEL = "Menüpunkte";
+		
 		public MpunktePanel(final Set<InfoLine> infos) {
 			setLayout(new BorderLayout(0,0));
 			final JTable table = new JTable();
@@ -228,6 +235,8 @@ public class GrafikApplet extends JApplet {
 	 */
 	private static class WorkerPanel extends JPanel {
 
+		public static final String LABEL = "Benutzer";
+		
 		public WorkerPanel(final Set<InfoLine> infos) {
 			setLayout(new BorderLayout(0,0));
 			final JTable table = new JTable();
@@ -256,21 +265,24 @@ public class GrafikApplet extends JApplet {
 	 */
 	private static class GfxPanel extends JPanel {
 
+		public static final String LABEL = "Grafik";
+		
 		public GfxPanel(final VisualizationViewer<Menu, Edge> vv,
 				final VisualizationServer.Paintable rings,
 				final TreeLayout<Menu,Edge> treeLayout,
-				final RadialTreeLayout<Menu,Edge> radialLayout) {
+				final RadialTreeLayout<Menu,Edge> radialLayout,
+				final TreeCollapser collapser) {
 			setLayout(new BorderLayout(0,0));
 			// Hintergrund
 			vv.setBackground(Color.white);
-			
+
 			// Label
 			vv.getRenderContext().setVertexLabelTransformer(new Transformer<Menu, String>() {
-	            @Override
+				@Override
 				public String transform(final Menu e) {
-	                return (e.getName());
-	            }
-	        });
+					return (e.getName());
+				}
+			});
 			// Darstellung
 			final Transformer<Menu,Paint> vertexColor = new Transformer<Menu, Paint>() {
 				@Override
@@ -297,7 +309,7 @@ public class GrafikApplet extends JApplet {
 			};
 			vv.getRenderContext().setVertexFillPaintTransformer(vertexColor);
 			vv.getRenderContext().setVertexShapeTransformer(vertexSize);
-			
+
 			// Kanten anhand der prozentualen Nutzung vergrößern
 			final Transformer<Edge, Stroke> edgeStroke = new Transformer<Edge, Stroke>() {
 				@Override
@@ -326,16 +338,16 @@ public class GrafikApplet extends JApplet {
 			vv.getRenderContext().setEdgeStrokeTransformer(edgeStroke);
 			// Tooltips
 			vv.setVertexToolTipTransformer(new Transformer<Menu, String>(){
-			    @Override
+				@Override
 				public String transform(final Menu m) {
-			        return String.format("Prozentualer Anteil: %.2f ",m.getSize());
-			    }
+					return String.format("Prozentualer Anteil: %.2f ",m.getSize());
+				}
 			});
 			vv.setEdgeToolTipTransformer(new Transformer<Edge,String>(){
-			    @Override
+				@Override
 				public String transform(final Edge e) {
-			        return "Edge:"+e.getWeight();
-			    }
+					return "Edge:"+e.getWeight();
+				}
 			});
 			vv.getRenderContext().setArrowFillPaintTransformer(new ConstantTransformer(Color.CYAN));
 
@@ -388,6 +400,47 @@ public class GrafikApplet extends JApplet {
 					vv.repaint();
 				}});
 
+			// Auf und zuklappen von Vertecis
+			final JButton collapse = new JButton("Collapse");
+			collapse.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(final ActionEvent e) {
+					final Collection picked = new HashSet(vv.getPickedVertexState().getPicked());
+					if(picked.size() == 1) {
+						final Object root = picked.iterator().next();
+						final Forest inGraph = (Forest)vv.getGraphLayout().getGraph();
+
+						try {
+							collapser.collapse(vv.getGraphLayout(), inGraph, root);
+						} catch (final InstantiationException e1) {
+							e1.printStackTrace();
+						} catch (final IllegalAccessException e1) {
+							e1.printStackTrace();
+						}
+
+						vv.getPickedVertexState().clear();
+						vv.repaint();
+					}
+				}});
+
+			final JButton expand = new JButton("Expand");
+			expand.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(final ActionEvent e) {
+					final Collection picked = vv.getPickedVertexState().getPicked();
+					for(final Object v : picked) {
+						if(v instanceof Forest) {
+							final Forest inGraph = (Forest)treeLayout.getGraph();
+							collapser.expand(inGraph, (Forest)v);
+						}
+						vv.getPickedVertexState().clear();
+						vv.repaint();
+					}
+				}});
+
+
 			// Mausverhalten instaziieren und festelegen
 			final DefaultModalGraphMouse graphMouse = new DefaultModalGraphMouse();
 			vv.setGraphMouse(graphMouse);
@@ -403,7 +456,10 @@ public class GrafikApplet extends JApplet {
 			controls.add(radial);
 			controls.add(scaleGrid);
 			controls.add(modeBox);
+			controls.add(collapse);
+			controls.add(expand);
 			add(controls, BorderLayout.SOUTH);
+
 		}
 
 	}
@@ -416,7 +472,7 @@ public class GrafikApplet extends JApplet {
 		/** die Spaltendefinition */
 		private static final Object[][] COLUMNS = new Object[][] {
 			{"Name", String.class, 300},
-			{".", String.class, 300},
+			{"Pfad/Name", String.class, 300},
 			{"Anzahl.", Integer.class, 300},
 		};
 
