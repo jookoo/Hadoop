@@ -280,7 +280,7 @@ public class InformationCreator {
 		public String getName() {
 			return name;
 		}
-
+		
 		/**
 		 * Setzt die aktuelle prozentuale Größe.
 		 * @param size eine Größe

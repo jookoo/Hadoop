@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
@@ -30,6 +31,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JApplet;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -57,6 +59,7 @@ import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ScalingControl;
 import edu.uci.ics.jung.visualization.decorators.EdgeShape;
 import edu.uci.ics.jung.visualization.layout.LayoutTransition;
+import edu.uci.ics.jung.visualization.renderers.DefaultVertexLabelRenderer;
 import edu.uci.ics.jung.visualization.util.Animator;
 import graphics.InformationCreator.Edge;
 import graphics.InformationCreator.Menu;
@@ -112,7 +115,7 @@ public class GrafikApplet extends JApplet {
 	public GrafikApplet() {
 		this(FILENAME_INFO,FILENAME_SESSION);
 	}
-	
+
 	/**
 	 * Ein Konstruktor
 	 */
@@ -263,14 +266,16 @@ public class GrafikApplet extends JApplet {
 			setLayout(new BorderLayout(0,0));
 			// Hintergrund
 			vv.setBackground(Color.white);
-			
+			vv.setFont(Font.getFont("Arial"));
 			// Label
 			vv.getRenderContext().setVertexLabelTransformer(new Transformer<Menu, String>() {
-	            @Override
+				@Override
 				public String transform(final Menu e) {
-	                return (e.getName());
-	            }
-	        });
+					return (e.getName());
+				}
+			});
+			vv.getRenderContext().setVertexLabelRenderer(new MyDefaultVertexLaberRenderer());
+
 			// Darstellung
 			final Transformer<Menu,Paint> vertexColor = new Transformer<Menu, Paint>() {
 				@Override
@@ -297,7 +302,7 @@ public class GrafikApplet extends JApplet {
 			};
 			vv.getRenderContext().setVertexFillPaintTransformer(vertexColor);
 			vv.getRenderContext().setVertexShapeTransformer(vertexSize);
-			
+
 			// Kanten anhand der prozentualen Nutzung vergrößern
 			final Transformer<Edge, Stroke> edgeStroke = new Transformer<Edge, Stroke>() {
 				@Override
@@ -326,16 +331,16 @@ public class GrafikApplet extends JApplet {
 			vv.getRenderContext().setEdgeStrokeTransformer(edgeStroke);
 			// Tooltips
 			vv.setVertexToolTipTransformer(new Transformer<Menu, String>(){
-			    @Override
+				@Override
 				public String transform(final Menu m) {
-			        return String.format("Prozentualer Anteil: %.2f ",m.getSize());
-			    }
+					return String.format("Prozentualer Anteil: %.2f ",m.getSize());
+				}
 			});
 			vv.setEdgeToolTipTransformer(new Transformer<Edge,String>(){
-			    @Override
+				@Override
 				public String transform(final Edge e) {
-			        return "Edge:"+e.getWeight();
-			    }
+					return "Edge:"+e.getWeight();
+				}
 			});
 			vv.getRenderContext().setArrowFillPaintTransformer(new ConstantTransformer(Color.CYAN));
 
@@ -518,5 +523,39 @@ public class GrafikApplet extends JApplet {
 			return comp;
 		}
 
+	}
+
+	public static class MyDefaultVertexLaberRenderer extends DefaultVertexLabelRenderer {
+
+		protected Color unpickedVertexLabelColor = Color.BLACK;
+
+		public MyDefaultVertexLaberRenderer() {
+			super(Color.BLUE);
+		}
+
+		@Override
+		public <V> Component getVertexLabelRendererComponent(
+				final JComponent vv, final Object value, 
+				final Font font, final boolean isSelected, final V vertex) {
+			super.setForeground(unpickedVertexLabelColor);
+			if (isSelected) {
+				setForeground(pickedVertexLabelColor);
+			}
+			super.setBackground(vv.getBackground());
+			if (font != null) {
+				setFont(font);
+			} else {
+				setFont(vv.getFont());
+			}
+			setIcon(null);
+			setBorder(noFocusBorder);
+			setToolTipText((String) value);
+			setValue(truncate((String)value,5));
+			return this;
+		}
+		
+		private String truncate(final String str, final int n) {
+			return str.length()>n ? str.substring(0,n-1)+"..." : str;
+		}
 	}
 }
