@@ -78,10 +78,10 @@ import graphics.InformationCreator.Weights;
 public class GrafikApplet extends JApplet {
 
 	/** das Input-Info-Job-Ergebniss */
-	private static final String FILENAME_INFO = "C:\\input_info.txt";
+	private static final String FILENAME_INFO = "D:\\input_info.txt";
 
 	/** das User-Session-Job-Ergebniss */
-	private static final String FILENAME_SESSION = "C:\\user_session.txt";
+	private static final String FILENAME_SESSION = "D:\\user_session.txt";
 
 	/** die Grafik */
 	private final Forest<Menu,Edge> graph;
@@ -140,8 +140,8 @@ public class GrafikApplet extends JApplet {
 		// Grafik
 		final MyTreeBuilder graphic = new MyTreeBuilder(map, set);
 		graph = graphic.getForest();
-		treeLayout = new TreeLayout<Menu,Edge>(graph);
-		radialLayout = new RadialTreeLayout<Menu,Edge>(graph);
+		treeLayout = new TreeLayout<Menu,Edge>(graph, 100);
+		radialLayout = new RadialTreeLayout<Menu,Edge>(graph, 100);
 		radialLayout.setSize(new Dimension(1000,1000));
 		vv =  new VisualizationViewer<Menu,Edge>(treeLayout, new Dimension(1000,1000));
 		rings = new Rings();
@@ -150,9 +150,9 @@ public class GrafikApplet extends JApplet {
 		final JPanel mpane = new MpunktePanel(creator.getInfos());
 		final JPanel wpane = new WorkerPanel(creator.getInfos());
 		final JPanel gpane = new GfxPanel(graph,vv,rings,treeLayout,radialLayout,subtrees);
-		tpane.add("Menüpunkte", mpane);
-		tpane.add("Mitarbeiter", wpane);
-		tpane.add("Grafik", gpane);
+		tpane.add(MpunktePanel.LABEL, mpane);
+		tpane.add(WorkerPanel.LABEL, wpane);
+		tpane.add(GfxPanel.LABEL, gpane);
 		content.add(tpane);
 	}
 
@@ -208,6 +208,8 @@ public class GrafikApplet extends JApplet {
 	 */
 	private static class MpunktePanel extends JPanel {
 
+		public static final String LABEL = "Menüpunkte";
+		
 		public MpunktePanel(final Set<InfoLine> infos) {
 			setLayout(new BorderLayout(0,0));
 			final JTable table = new JTable();
@@ -236,6 +238,8 @@ public class GrafikApplet extends JApplet {
 	 */
 	private static class WorkerPanel extends JPanel {
 
+		public static final String LABEL = "Benutzer";
+		
 		public WorkerPanel(final Set<InfoLine> infos) {
 			setLayout(new BorderLayout(0,0));
 			final JTable table = new JTable();
@@ -264,6 +268,8 @@ public class GrafikApplet extends JApplet {
 	 */
 	private static class GfxPanel extends JPanel {
 
+		public static final String LABEL = "Grafik";
+		
 		/**
 		 * Ein Konstruktor.
 		 * @param graph
@@ -274,7 +280,7 @@ public class GrafikApplet extends JApplet {
 		 * @param subtrees
 		 */
 		public GfxPanel(
-				final Forest<Menu,Edge> graph,
+				final Forest <Menu,Edge> graph,
 				final VisualizationViewer<Menu, Edge> vv,
 				final VisualizationServer.Paintable rings,
 				final TreeLayout<Menu,Edge> treeLayout,
@@ -293,7 +299,6 @@ public class GrafikApplet extends JApplet {
 			});
 			// Label-Renderer
 			vv.getRenderContext().setVertexLabelRenderer(new MyDefaultVertexLaberRenderer());
-
 			// Darstellung
 			final Transformer<Menu,Paint> vertexColor = new Transformer<Menu, Paint>() {
 				@Override
@@ -467,8 +472,6 @@ public class GrafikApplet extends JApplet {
 			controls.add(collapse);
 			controls.add(expand);
 			add(controls, BorderLayout.SOUTH);
-			
-			
 		}
 		
 		/**
@@ -509,13 +512,15 @@ public class GrafikApplet extends JApplet {
 				final Map<Menu, Forest<Menu, Edge>> subtrees) 
 						throws InstantiationException, IllegalAccessException {
 			final Forest<Menu, Edge> forest = subtrees.get(pick);
-			for (final Menu m: forest.getVertices()) {
-				tree.addVertex(m);
+			if (null != forest) {
+				for (final Menu m: forest.getVertices()) {
+					tree.addVertex(m);
+				}
+				for (final Edge e: forest.getEdges()) {
+					tree.addEdge(e, e.getFrom(), e.getTo());
+				}
+				subtrees.remove(pick);
 			}
-			for (final Edge e: forest.getEdges()) {
-				tree.addEdge(e, e.getFrom(), e.getTo());
-			}
-			subtrees.remove(pick);
 		}
 	}
 
@@ -527,7 +532,7 @@ public class GrafikApplet extends JApplet {
 		/** die Spaltendefinition */
 		private static final Object[][] COLUMNS = new Object[][] {
 			{"Name", String.class, 300},
-			{".", String.class, 300},
+			{"Pfad/Name", String.class, 300},
 			{"Anzahl.", Integer.class, 300},
 		};
 
