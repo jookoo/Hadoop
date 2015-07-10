@@ -264,6 +264,15 @@ public class GrafikApplet extends JApplet {
 	 */
 	private static class GfxPanel extends JPanel {
 
+		/**
+		 * Ein Konstruktor.
+		 * @param graph
+		 * @param vv
+		 * @param rings
+		 * @param treeLayout
+		 * @param radialLayout
+		 * @param subtrees
+		 */
 		public GfxPanel(
 				final Forest<Menu,Edge> graph,
 				final VisualizationViewer<Menu, Edge> vv,
@@ -282,6 +291,7 @@ public class GrafikApplet extends JApplet {
 					return (e.getName());
 				}
 			});
+			// Label-Renderer
 			vv.getRenderContext().setVertexLabelRenderer(new MyDefaultVertexLaberRenderer());
 
 			// Darstellung
@@ -401,6 +411,7 @@ public class GrafikApplet extends JApplet {
 					vv.repaint();
 				}});
 
+			// Knopf zum "Einklappen" von Knoten
 			final JButton collapse = new JButton("Collapse");
 			collapse.addActionListener(new ActionListener() {
 
@@ -415,29 +426,17 @@ public class GrafikApplet extends JApplet {
 								| IllegalAccessException e1) {
 							e1.printStackTrace();
 						}
-//						while () {
-//							vv.getModel().getGraphLayout().getGraph().removeVertex((Menu) root);
-//						}
-//						// get a sub tree from subRoot
-//						try {
-//							collapser.collapse(l, inGraph, root);
-//						} catch (final InstantiationException e1) {
-//							e1.printStackTrace();
-//						} catch (final IllegalAccessException e1) {
-//							e1.printStackTrace();
-//						}
-//
-						vv.getPickedVertexState().clear();
 						vv.repaint();
 					}
 				}});
 
+			// Knopf zum "Ausklappen" von Knoten
 			final JButton expand = new JButton("Expand");
 			expand.addActionListener(new ActionListener() {
 
 				@Override
 				public void actionPerformed(final ActionEvent e) {
-					final Collection picked = vv.getPickedVertexState().getPicked();
+					final Collection<Menu> picked = vv.getPickedVertexState().getPicked();
 					for(final Object v : picked) {
 						try {
 							expand(graph, v, subtrees);
@@ -445,7 +444,6 @@ public class GrafikApplet extends JApplet {
 								| IllegalAccessException e1) {
 							e1.printStackTrace();
 						}
-						vv.getPickedVertexState().clear();
 						vv.repaint();
 					}
 				}});
@@ -469,9 +467,13 @@ public class GrafikApplet extends JApplet {
 			controls.add(collapse);
 			controls.add(expand);
 			add(controls, BorderLayout.SOUTH);
+			
+			
 		}
 		
 		/**
+		 * Klappt vom ausgewählten Knoten aus alle Kind-Knoten ein.
+		 * <p>
 		 * Eigene Implementierung, da der Collapser aus den TreeUtils nicht
 		 * mit den selbstentwickelten Klassen zurecht kommt.
 		 * @param tree
@@ -493,6 +495,14 @@ public class GrafikApplet extends JApplet {
 	    	}
 		}
 
+		/**
+		 * Klappt vom ausgewählten Knoten alle Kind-Knoten aus.
+		 * @param tree
+		 * @param pick
+		 * @param subtrees
+		 * @throws InstantiationException
+		 * @throws IllegalAccessException
+		 */
 		private void expand(
 				final Forest<Menu, Edge> tree, 
 				final Object pick, 
@@ -507,22 +517,6 @@ public class GrafikApplet extends JApplet {
 			}
 			subtrees.remove(pick);
 		}
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
 	}
 
 	/**
