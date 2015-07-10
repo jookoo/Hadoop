@@ -22,6 +22,7 @@ public class MyTreeBuilder {
 
 	/** die Baumstruktur */
 	private final DelegateForest<Menu,Edge> mTree = new DelegateForest<Menu, Edge>();
+	
 	/**
 	 * ein Konstruktor
 	 * @param vertecis die bekannten Menüpunkte

@@ -21,6 +21,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -49,6 +50,8 @@ import edu.uci.ics.jung.algorithms.layout.PolarPoint;
 import edu.uci.ics.jung.algorithms.layout.RadialTreeLayout;
 import edu.uci.ics.jung.algorithms.layout.TreeLayout;
 import edu.uci.ics.jung.graph.Forest;
+import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.graph.util.TreeUtils;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.Layer;
 import edu.uci.ics.jung.visualization.VisualizationServer;
@@ -94,7 +97,9 @@ public class GrafikApplet extends JApplet {
 
 	/** ein radiales Baumlayout */
 	private final RadialTreeLayout<Menu,Edge> radialLayout;
-
+	
+	private final Map<Menu, Forest<Menu, Edge>> subtrees = new HashMap<>();
+	
 	/**
 	 * die Methode zur Ausführung
 	 * @param args
@@ -144,7 +149,7 @@ public class GrafikApplet extends JApplet {
 		final JTabbedPane tpane = new JTabbedPane();
 		final JPanel mpane = new MpunktePanel(creator.getInfos());
 		final JPanel wpane = new WorkerPanel(creator.getInfos());
-		final JPanel gpane = new GfxPanel(vv,rings,treeLayout,radialLayout);
+		final JPanel gpane = new GfxPanel(graph,vv,rings,treeLayout,radialLayout,subtrees);
 		tpane.add("Menüpunkte", mpane);
 		tpane.add("Mitarbeiter", wpane);
 		tpane.add("Grafik", gpane);
@@ -259,10 +264,13 @@ public class GrafikApplet extends JApplet {
 	 */
 	private static class GfxPanel extends JPanel {
 
-		public GfxPanel(final VisualizationViewer<Menu, Edge> vv,
+		public GfxPanel(
+				final Forest<Menu,Edge> graph,
+				final VisualizationViewer<Menu, Edge> vv,
 				final VisualizationServer.Paintable rings,
 				final TreeLayout<Menu,Edge> treeLayout,
-				final RadialTreeLayout<Menu,Edge> radialLayout) {
+				final RadialTreeLayout<Menu,Edge> radialLayout,
+				final Map<Menu, Forest<Menu, Edge>> subtrees) {
 			setLayout(new BorderLayout(0,0));
 			// Hintergrund
 			vv.setBackground(Color.white);
@@ -393,12 +401,62 @@ public class GrafikApplet extends JApplet {
 					vv.repaint();
 				}});
 
+			final JButton collapse = new JButton("Collapse");
+			collapse.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(final ActionEvent e) {
+					final Collection<Menu> picked = new HashSet(vv.getPickedVertexState().getPicked());
+					if(picked.size() == 1) {
+						final Object root = picked.iterator().next();
+						try {
+							collapse(graph, root, subtrees);
+						} catch (InstantiationException
+								| IllegalAccessException e1) {
+							e1.printStackTrace();
+						}
+//						while () {
+//							vv.getModel().getGraphLayout().getGraph().removeVertex((Menu) root);
+//						}
+//						// get a sub tree from subRoot
+//						try {
+//							collapser.collapse(l, inGraph, root);
+//						} catch (final InstantiationException e1) {
+//							e1.printStackTrace();
+//						} catch (final IllegalAccessException e1) {
+//							e1.printStackTrace();
+//						}
+//
+						vv.getPickedVertexState().clear();
+						vv.repaint();
+					}
+				}});
+
+			final JButton expand = new JButton("Expand");
+			expand.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(final ActionEvent e) {
+					final Collection picked = vv.getPickedVertexState().getPicked();
+					for(final Object v : picked) {
+						try {
+							expand(graph, v, subtrees);
+						} catch (InstantiationException
+								| IllegalAccessException e1) {
+							e1.printStackTrace();
+						}
+						vv.getPickedVertexState().clear();
+						vv.repaint();
+					}
+				}});
+
+
 			// Mausverhalten instaziieren und festelegen
 			final DefaultModalGraphMouse graphMouse = new DefaultModalGraphMouse();
 			vv.setGraphMouse(graphMouse);
 			final JComboBox modeBox = graphMouse.getModeComboBox();
 			modeBox.addItemListener(graphMouse.getModeListener());
-			graphMouse.setMode(ModalGraphMouse.Mode.TRANSFORMING);  
+			graphMouse.setMode(ModalGraphMouse.Mode.PICKING);  
 
 			final JPanel scaleGrid = new JPanel(new GridLayout(1,0));
 			scaleGrid.setBorder(BorderFactory.createTitledBorder("Zoom"));
@@ -408,9 +466,63 @@ public class GrafikApplet extends JApplet {
 			controls.add(radial);
 			controls.add(scaleGrid);
 			controls.add(modeBox);
+			controls.add(collapse);
+			controls.add(expand);
 			add(controls, BorderLayout.SOUTH);
 		}
+		
+		/**
+		 * Eigene Implementierung, da der Collapser aus den TreeUtils nicht
+		 * mit den selbstentwickelten Klassen zurecht kommt.
+		 * @param tree
+		 * @param pick
+		 * @param removedVertecis
+		 * @param removedEdges
+		 * @throws InstantiationException
+		 * @throws IllegalAccessException
+		 */
+		private void collapse(
+				final Forest<Menu, Edge> tree, 
+				final Object pick, 
+				final Map<Menu, Forest<Menu, Edge>> subtrees) 
+						throws InstantiationException, IllegalAccessException {
+			final Forest<Menu, Edge> subTree = TreeUtils.getSubTree(tree, (Menu)pick);
+			subtrees.put((Menu) pick, subTree);
+	    	for (final Menu m: subTree.getChildren((Menu) pick)) {
+    				tree.removeVertex(m);
+	    	}
+		}
 
+		private void expand(
+				final Forest<Menu, Edge> tree, 
+				final Object pick, 
+				final Map<Menu, Forest<Menu, Edge>> subtrees) 
+						throws InstantiationException, IllegalAccessException {
+			final Forest<Menu, Edge> forest = subtrees.get(pick);
+			for (final Menu m: forest.getVertices()) {
+				tree.addVertex(m);
+			}
+			for (final Edge e: forest.getEdges()) {
+				tree.addEdge(e, e.getFrom(), e.getTo());
+			}
+			subtrees.remove(pick);
+		}
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 	}
 
 	/**
@@ -550,12 +662,34 @@ public class GrafikApplet extends JApplet {
 			setIcon(null);
 			setBorder(noFocusBorder);
 			setToolTipText((String) value);
-			setValue(truncate((String)value,5));
+			setValue(truncate((String)value,10));
 			return this;
 		}
-		
+
 		private String truncate(final String str, final int n) {
 			return str.length()>n ? str.substring(0,n-1)+"..." : str;
 		}
 	}
+	
+    /**
+     * A demo class that will make vertices larger if they represent
+     * a collapsed collection of original vertices
+     * @author Tom Nelson
+     *
+     * @param <V>
+     */
+   private static class ClusterVertexSizeFunction<V> implements Transformer<V,Integer> {
+    	int size;
+        public ClusterVertexSizeFunction(final Integer size) {
+            this.size = size;
+        }
+
+        @Override
+		public Integer transform(final V v) {
+            if(v instanceof Graph) {
+                return 30;
+            }
+            return size;
+        }
+    }
 }

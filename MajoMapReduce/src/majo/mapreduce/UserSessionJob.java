@@ -41,13 +41,13 @@ public class UserSessionJob {
 	 */
 	public static class UserValueMapper extends Mapper<Object, Text, Text, UserSession> {
 
-//		/** der Programmfilter */
-//		public static final String FILTER_PRG = 
-//				"(GH)|(KND_BUHA)|(LIEF_BUHA)";
-		
 		/** der Programmfilter */
 		public static final String FILTER_PRG = 
-				"GH";
+				"(GH)|(KND_BUHA)|(LIEF_BUHA)";
+		
+//		/** der Programmfilter */
+//		public static final String FILTER_PRG = 
+//				"GH";
 		
 		@Override
 		public void map(
@@ -167,8 +167,7 @@ public class UserSessionJob {
 			// gesammelte Sitzungen
 			final TreeSet<UserSession> sessions = new TreeSet<>();
 			// TreeMap um nach Zeit zu sortieren
-			final TreeMap<Long,String> cache = new TreeMap<>();
-
+			final TreeMap<Long, String> cache = new TreeMap<>();
 			// Konfiguration
 			final Configuration conf = context.getConfiguration();
 			final int minutes = conf.getInt(Main.MENULOG_MINUTES_MAX, 30);

@@ -21,7 +21,7 @@ public class InputInfoJob {
 
 	/** der Programmfilter */
 	public static final String FILTER_PRG = 
-			"GH";
+			"(GH)|(KND_BUHA)|(LIEF_BUHA)";
 	
 	/**
 	 * Interpretiert eine MenulogLine und weist jeweils eine Benutzerzeile
@@ -29,7 +29,7 @@ public class InputInfoJob {
 	 * Programm und Menüaufruf eine Zeile mit einer 1 zu. (Wordcount)
 	 * 
 	 * <p>
-	 * (Benuter, 1)
+	 * (Benutzer, 1)
 	 * (Programm~Menü, 1)
 	 * 
 	 */
