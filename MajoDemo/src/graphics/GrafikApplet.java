@@ -419,7 +419,7 @@ public class GrafikApplet extends JApplet {
 			// Knopf zum "Einklappen" von Knoten
 			final JButton collapse = new JButton("Collapse");
 			collapse.addActionListener(new ActionListener() {
-
+				
 				@Override
 				public void actionPerformed(final ActionEvent e) {
 					final Collection<Menu> picked = new HashSet(vv.getPickedVertexState().getPicked());
