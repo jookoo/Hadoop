@@ -41,12 +41,12 @@
 			</fileset>
 		</scp>
 		
-		<!-- sshexec host="${headnode}"
+		<!--sshexec host="${headnode}"
 				 port="2244"
 		         username="${username}"
 		         password="${passwd}"
 		         trust="true"
-		         command="${destpath}/prephadoop.sh*" /-->
+		         command="${destpath}/prephadoop.sh*"/-->
 	</target>
 	
 	<!-- run shell script <target name="run" depends="jar"> <exec executable="sh"> 

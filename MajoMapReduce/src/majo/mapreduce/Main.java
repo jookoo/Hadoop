@@ -2,11 +2,6 @@ package majo.mapreduce;
 
 import java.io.IOException;
 
-import majo.mapreduce.InputInfoJob.IntSumReducer;
-import majo.mapreduce.InputInfoJob.TokenizerMapper;
-import majo.mapreduce.UserSessionJob.SessionReducer;
-import majo.mapreduce.UserSessionJob.UserValueMapper;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -22,6 +17,11 @@ import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 
+import majo.mapreduce.InputInfoJob.IntSumReducer;
+import majo.mapreduce.InputInfoJob.TokenizerMapper;
+import majo.mapreduce.UserSessionJob.SessionReducer;
+import majo.mapreduce.UserSessionJob.UserValueMapper;
+
 /**
  * Konfiguration und Starter für die gesamte Datenvorbereitung durch MapReduce.
  * 
@@ -35,12 +35,19 @@ public class Main {
 
 	/** Konstante für Wartezeit-In-Minuten-Schlüssel */
 	public static final String MENULOG_MINUTES_MAX = "menulog.minutes.max";
+	
+	/** Konstante für Wartezeit-In-Minuten-Schlüssel */
+	public static final String MENULOG_SECONDS_MAX = "menulog.seconds.max";
 
+	/** Konstante für Menuefilter-Schlüssel */
+	public static final String MENULOG_FILTER_MENUE = "menulog.filter.menu";
+	
 	public static void main(final String[] args) throws Exception {	
 		// Konfiguration
 		final JobConf conf = new JobConf();
 //		conf.set(MENULOG_FILTER_USERNAME, "10");
-//		conf.setInt(MENULOG_MINUTES_MAX, 240);
+		conf.setStrings(MENULOG_FILTER_MENUE,"9. Listen");
+		conf.setInt(MENULOG_SECONDS_MAX, 10);
 		int code = 0;
 
 		// Aktiviert die Komprimierung der Ergebnis-Datei
@@ -61,8 +68,8 @@ public class Main {
 		code += (userSessionJob.waitForCompletion(true) ? 0 : 1);
 		
 		// Job 3 anlegen/ausführen
-		final Job sessionOverviewJob = createSessionOverviewJob(conf);
-		code += (userSessionJob.waitForCompletion(true) ? 0 : 1);
+//		final Job sessionOverviewJob = createSessionOverviewJob(conf);
+//		code += (userSessionJob.waitForCompletion(true) ? 0 : 1);
 
 		// Ausführung abwarten
 		System.exit(code);

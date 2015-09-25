@@ -26,10 +26,12 @@ public class UserSessionJob {
 	 * Beschreibung für verschiedene Zähler im Job.
 	 */
 	public static enum COUNTER {
-		  /** Zähler für herausgefilterte Benutzer (durch {@link Main#MENULOG_FILTER_USERNAME} */
+		  /** Zähler für herausgefilterte Benutzer (durch {@link Main#FILTER_PRG} */
 		  OTHER_PROGRAM_LINE,
-		  /** Zähler für herausgefilterte Benutzer (durch {@link UserSessionJob#FILTER_PRG} */
+		  /** Zähler für herausgefilterte Benutzer (durch {@link UserSessionJob#MENULOG_FILTER_USERNAME} */
 		  OTHER_USERNAME_LINE,
+		  /** Zähler für herausgefilterte Benutzer (durch {@link UserSessionJob#MENULOG_FILTER_MENUE} */
+		  OTHER_MENUE_LINE,
 	}
 
 	/**
@@ -41,13 +43,16 @@ public class UserSessionJob {
 	 */
 	public static class UserValueMapper extends Mapper<Object, Text, Text, UserSession> {
 
-		/** der Programmfilter */
-		public static final String FILTER_PRG = 
-				"(GH)|(KND_BUHA)|(LIEF_BUHA)";
-		
 //		/** der Programmfilter */
 //		public static final String FILTER_PRG = 
-//				"GH";
+//				"(GH)|(KND_BUHA)|(LIEF_BUHA)";
+		
+		/** Benutzerfilter */
+		public static final String FILTER_USER = null;
+		
+		/** der Programmfilter */
+		public static final String FILTER_PRG = 
+				"GH";
 		
 		@Override
 		public void map(
@@ -55,6 +60,7 @@ public class UserSessionJob {
 						throws IOException, InterruptedException {
 			final Configuration conf = context.getConfiguration();
 			final String filterUser = conf.get(Main.MENULOG_FILTER_USERNAME);
+			final String filterMenue = conf.get(Main.MENULOG_FILTER_MENUE);
 			
 			/**
 			 * Mapper lesen im Standardfall CSV Dateien Zeilenweise ein,
@@ -68,16 +74,20 @@ public class UserSessionJob {
 			if (acceptProgram(prg)) {
 				final String username = line.getCleanUser();
 				// Falls eine Auswertung zu einem spezifischen Benutzer gemacht werden soll
-				if (null == filterUser || filterUser.equals(username)) {
+//				if (acceptUser(username, filterUser)) {
 					final Calendar cal = line.getDateTime();
 					final long timestamp = cal.getTimeInMillis();
 					final String menue = line.getCleanValue();
-					final UserSession session = 
-							new UserSession(username, timestamp, menue);
-					context.write(new Text(username), session);
-				} else {
-					context.getCounter(COUNTER.OTHER_USERNAME_LINE).increment(1);					
-				}
+//					if (acceptMenu(menue, filterMenue)) {
+						final UserSession session = 
+								new UserSession(username, timestamp, menue);
+						context.write(new Text(username), session);
+//					} else {
+//						context.getCounter(COUNTER.OTHER_MENUE_LINE).increment(1);					
+//					}
+//				} else {
+//					context.getCounter(COUNTER.OTHER_USERNAME_LINE).increment(1);					
+//				}
 			} else {
 				context.getCounter(COUNTER.OTHER_PROGRAM_LINE).increment(1);
 			}
@@ -97,6 +107,43 @@ public class UserSessionJob {
 			return match;
 		}
 		
+		/**
+		 * Liefert <code>true</code> wenn {@code user} einem gesuchten Benutzer
+		 * entspricht.
+		 * @param user der Benutzer
+		 * @param filterUser der gesuchte Benutzer
+		 * @return <code>true</code> wenn gesucht
+		 */
+		public boolean acceptUser(final String user, final String filterUser) {
+			boolean match = false;
+			if (null != filterUser) {
+				if (null != user && null != filterUser) {
+					match = user.toUpperCase().matches(filterUser);
+				}
+			} else {
+				match = true;
+			}
+			return match;
+		}
+		
+		/**
+		 * Liefert <code>true</code> wenn {@code menu} einem gesuchten Menüpunkt
+		 * entspricht.
+		 * @param menu der Benutzer
+		 * @param filterUser der gesuchte Benutzer
+		 * @return <code>true</code> wenn gesucht
+		 */
+		public boolean acceptMenu(final String menu, final String filterMenue) {
+			boolean match = false;
+			if (null != filterMenue) {
+				if (null != menu && null != filterMenue) {
+					match = menu.toUpperCase().matches(filterMenue);
+				}
+			} else {
+				match = true;
+			}
+			return match;
+		}
 	}
 
 	/**
@@ -140,6 +187,14 @@ public class UserSessionJob {
 			STARTPAGES.add("W. Nachlieferung");
 		}
 		
+		/** die reduzierten Startseiten */
+		public static final Set<String> STARTPAGES_REDUCED = new HashSet<>();	
+		static {
+			STARTPAGES_REDUCED.add("9. Listen");
+//			STARTPAGES_REDUCED.add("A. Etiketten / Schilder / Belege");
+//			STARTPAGES_REDUCED.add("Q. Nur für 18");
+		}
+		
 		/** die Abschlussseiten */
 		private static final Set<String> ENDPAGES = new HashSet<>();	
 		static {
@@ -152,6 +207,13 @@ public class UserSessionJob {
 		 * 30 Minuten = 1.800.000
 		 */
 		private static final long FACTOR = (60 * 1000);
+		
+		/** 
+		 * maximaler Abstand zwischen zwei Einträgen in der Session:
+		 * x Sekunden * 1000 Millisekunden
+		 * 30 Sekunden = 30.000
+		 */
+		private static final long FACTOR_SECONDS = 1000;
 		
 		/** 
 		 * die Verzögerung, die Zeiten zwischen zwei 
@@ -170,8 +232,8 @@ public class UserSessionJob {
 			final TreeMap<Long, String> cache = new TreeMap<>();
 			// Konfiguration
 			final Configuration conf = context.getConfiguration();
-			final int minutes = conf.getInt(Main.MENULOG_MINUTES_MAX, 30);
-			delay = (minutes * FACTOR);
+			final int minutes = conf.getInt(Main.MENULOG_SECONDS_MAX, 30);
+			delay = (minutes * FACTOR_SECONDS);
 
 			monitor.println("username = " + key.toString() + ", delay = " + delay);
 			
@@ -216,8 +278,11 @@ public class UserSessionJob {
 			
 			// Sitzungen veröffentlichen 
 			for (final UserSession x: sessions) {
-				context.write(key, x);
-				monitor.println("\t\t\tpublish: " + x.getFirstTime() + " --> " + x.getMenues().size());
+				final String firstMenue = x.getMenues().get(x.getFirstTime());
+				if (STARTPAGES_REDUCED.contains(firstMenue)) {
+					context.write(key, x);
+					monitor.println("\t\t\tpublish: " + x.getFirstTime() + " --> " + x.getMenues().size());
+				}
 			}
 			
 			monitor.println(key.toString() + " (" + count + ") --> " + sessions.size());

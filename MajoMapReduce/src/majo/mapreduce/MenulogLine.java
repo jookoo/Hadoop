@@ -52,7 +52,8 @@ public class MenulogLine {
 			"(2.   Ab dem) \\d\\d\\.\\d\\d\\.\\d\\d\\d\\d",
 			"(1. Genau am) \\d\\d\\.\\d\\d\\.\\d\\d\\d\\d",
 			"(1. Fax-Bestellung) \\(.*\\)",
-			"(\\d+. E-Mail-Bestellung) \\(([\\w]+[\\.\\-]?)+@([\\w\\-]+\\.)+[a-zA-Z]{2,4}\\)"
+			"(\\d+. E-Mail-Bestellung) \\(([\\w]+[\\.\\-]?)+@([\\w\\-]+\\.)+[a-zA-Z]{2,4}\\)",
+			"(Q. Nur fuer 18)|(Q. Nur fÃ¼r 18)|(Q. Nur für 18)|(Q. Nur f\u00FCr 18)"
 		};
 
 	/**

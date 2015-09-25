@@ -78,7 +78,7 @@ import graphics.InformationCreator.Weights;
 public class GrafikApplet extends JApplet {
 
 	/** das Input-Info-Job-Ergebniss */
-	private static final String FILENAME_INFO = "D:\\input_info.txt";
+	private static final String FILENAME_INFO = "D:\\info_input.txt";
 
 	/** das User-Session-Job-Ergebniss */
 	private static final String FILENAME_SESSION = "D:\\user_session.txt";
