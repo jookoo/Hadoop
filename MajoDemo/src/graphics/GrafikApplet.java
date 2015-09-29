@@ -20,12 +20,17 @@ import java.awt.event.ItemListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
+import java.awt.print.PrinterException;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
@@ -40,6 +45,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JToggleButton;
+import javax.swing.SwingWorker;
+import javax.swing.ToolTipManager;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
@@ -77,6 +84,8 @@ import graphics.InformationCreator.Weights;
  */
 public class GrafikApplet extends JApplet {
 
+	public static final Map<String,String> USER_TRANSLATION = new HashMap<>();
+	
 	/** das Input-Info-Job-Ergebniss */
 	private static final String FILENAME_INFO = "D:\\info_input.txt";
 
@@ -97,9 +106,9 @@ public class GrafikApplet extends JApplet {
 
 	/** ein radiales Baumlayout */
 	private final RadialTreeLayout<Menu,Edge> radialLayout;
-	
+
 	private final Map<Menu, Forest<Menu, Edge>> subtrees = new HashMap<>();
-	
+
 	/**
 	 * die Methode zur Ausführung
 	 * @param args
@@ -119,6 +128,34 @@ public class GrafikApplet extends JApplet {
 	 */
 	public GrafikApplet() {
 		this(FILENAME_INFO,FILENAME_SESSION);
+		ladeBenutzerUebersetzung();
+	}
+	/**
+	 * Läd die Übersetzungstabelle aus dem B+R System
+	 */
+	private void ladeBenutzerUebersetzung() {
+		final String filename = "R:\\xprg\\vollneu\\AU\\TUSER.INI";
+		FileReader fr;
+		BufferedReader br;
+		try {
+			fr = new FileReader(filename);
+			br = new BufferedReader(fr);
+
+			String line = null;
+			line = br.readLine();
+			einlesen: while (line != null) {
+				if (0 < line.indexOf("=")) {
+					final String name = line.substring(0, line.indexOf("="));
+					final String shortcut = line.substring(line.indexOf("=")+1, line.length());
+					USER_TRANSLATION.put(shortcut, name);
+				}
+				line = br.readLine();
+			}
+			fr.close();
+		} catch (final IOException e){
+			System.out.println("Fehler beim Lesen der Datei " + filename);
+			System.out.println(e.toString());
+		}
 	}
 
 	/**
@@ -209,7 +246,7 @@ public class GrafikApplet extends JApplet {
 	private static class MpunktePanel extends JPanel {
 
 		public static final String LABEL = "Menüpunkte";
-		
+
 		public MpunktePanel(final Set<InfoLine> infos) {
 			setLayout(new BorderLayout(0,0));
 			final JTable table = new JTable();
@@ -236,13 +273,17 @@ public class GrafikApplet extends JApplet {
 	/**
 	 * Die anzeigende Komponente für die Tabelle mit Mitarbeitern
 	 */
-	private static class WorkerPanel extends JPanel {
+	private static class WorkerPanel extends JPanel implements ActionListener{
 
 		public static final String LABEL = "Benutzer";
-		
+
+		private final JButton button;
+
+		private final JTable table;
+
 		public WorkerPanel(final Set<InfoLine> infos) {
 			setLayout(new BorderLayout(0,0));
-			final JTable table = new JTable();
+			table = new JTable();
 			table.setAutoCreateRowSorter(true);
 			table.setDefaultRenderer(
 					InfoLine.class, new InfoTableCellRenderer());
@@ -258,7 +299,15 @@ public class GrafikApplet extends JApplet {
 			add(spane, BorderLayout.CENTER);
 			final JPanel soutp = new JPanel();
 			soutp.add(new JLabel("#Mitarbeiter "+ model.getSize()));
+			button = new JButton("Liste Drucken");
+			button.addActionListener(this);
+			soutp.add(button);
 			add(soutp, BorderLayout.SOUTH);
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent evt) {
+			new PrintWorker(table).execute();
 		}
 
 	}
@@ -269,7 +318,7 @@ public class GrafikApplet extends JApplet {
 	private static class GfxPanel extends JPanel {
 
 		public static final String LABEL = "Grafik";
-		
+
 		/**
 		 * Ein Konstruktor.
 		 * @param graph
@@ -306,7 +355,7 @@ public class GrafikApplet extends JApplet {
 					if(m.isStartpage()) {
 						return Color.BLACK;
 					} else {
-						if (m.getWeight() < 100) {
+						if (m.getWeight() < 50) {
 							return Color.RED;
 						} else {
 							return Color.GREEN;
@@ -353,10 +402,28 @@ public class GrafikApplet extends JApplet {
 			vv.getRenderContext().setEdgeDrawPaintTransformer(edgePaint);
 			vv.getRenderContext().setEdgeStrokeTransformer(edgeStroke);
 			// Tooltips
+			ToolTipManager.sharedInstance().setInitialDelay(0);
+			ToolTipManager.sharedInstance().setDismissDelay(10000);
+			
 			vv.setVertexToolTipTransformer(new Transformer<Menu, String>(){
 				@Override
 				public String transform(final Menu m) {
-					return String.format("Prozentualer Anteil: %.2f ",m.getSize());
+					final StringBuffer sb = new StringBuffer();
+					final int i = 5;
+					sb.append(String.format("<html>Top %d Nutzer:",i));
+					int counter = 1;
+					for (Entry<String, Integer> entry :m.getTopUser().entrySet()) {
+						if (counter > i) {
+							break;
+						}
+						final String nameshort = entry.getKey();
+						final String name = USER_TRANSLATION.get(nameshort);
+						final Integer count = entry.getValue();
+						sb.append(String.format("<p>%d mal %s</p>",count, (null == name ? nameshort:name)));
+						counter++;
+					}
+					sb.append("</html>");
+					return sb.toString();
 				}
 			});
 			vv.setEdgeToolTipTransformer(new Transformer<Edge,String>(){
@@ -419,7 +486,7 @@ public class GrafikApplet extends JApplet {
 			// Knopf zum "Einklappen" von Knoten
 			final JButton collapse = new JButton("Collapse");
 			collapse.addActionListener(new ActionListener() {
-				
+
 				@Override
 				public void actionPerformed(final ActionEvent e) {
 					final Collection<Menu> picked = new HashSet(vv.getPickedVertexState().getPicked());
@@ -459,7 +526,7 @@ public class GrafikApplet extends JApplet {
 			vv.setGraphMouse(graphMouse);
 			final JComboBox modeBox = graphMouse.getModeComboBox();
 			modeBox.addItemListener(graphMouse.getModeListener());
-			graphMouse.setMode(ModalGraphMouse.Mode.PICKING);  
+			graphMouse.setMode(ModalGraphMouse.Mode.TRANSFORMING);  
 
 			final JPanel scaleGrid = new JPanel(new GridLayout(1,0));
 			scaleGrid.setBorder(BorderFactory.createTitledBorder("Zoom"));
@@ -473,7 +540,7 @@ public class GrafikApplet extends JApplet {
 			controls.add(expand);
 			add(controls, BorderLayout.SOUTH);
 		}
-		
+
 		/**
 		 * Klappt vom ausgewählten Knoten aus alle Kind-Knoten ein.
 		 * <p>
@@ -493,9 +560,9 @@ public class GrafikApplet extends JApplet {
 						throws InstantiationException, IllegalAccessException {
 			final Forest<Menu, Edge> subTree = TreeUtils.getSubTree(tree, (Menu)pick);
 			subtrees.put((Menu) pick, subTree);
-	    	for (final Menu m: subTree.getChildren((Menu) pick)) {
-    				tree.removeVertex(m);
-	    	}
+			for (final Menu m: subTree.getChildren((Menu) pick)) {
+				tree.removeVertex(m);
+			}
 		}
 
 		/**
@@ -592,7 +659,7 @@ public class GrafikApplet extends JApplet {
 					value = v;
 					break;
 				case 1:
-					final String y = x.isWorkerLine() ? x.tranlatedName(): x.getProgram();
+					final String y = x.isWorkerLine() ? (null == x.translatedName() ? x.getUser(): x.translatedName()): x.getProgram();
 					value = y;
 					break;
 				case 2:
@@ -669,26 +736,47 @@ public class GrafikApplet extends JApplet {
 			return str.length()>n ? str.substring(0,n-1)+"..." : str;
 		}
 	}
-	
-    /**
-     * A demo class that will make vertices larger if they represent
-     * a collapsed collection of original vertices
-     * @author Tom Nelson
-     *
-     * @param <V>
-     */
-   private static class ClusterVertexSizeFunction<V> implements Transformer<V,Integer> {
-    	int size;
-        public ClusterVertexSizeFunction(final Integer size) {
-            this.size = size;
-        }
 
-        @Override
+	/**
+	 * A demo class that will make vertices larger if they represent
+	 * a collapsed collection of original vertices
+	 * @author Tom Nelson
+	 *
+	 * @param <V>
+	 */
+	private static class ClusterVertexSizeFunction<V> implements Transformer<V,Integer> {
+		int size;
+		public ClusterVertexSizeFunction(final Integer size) {
+			this.size = size;
+		}
+
+		@Override
 		public Integer transform(final V v) {
-            if(v instanceof Graph) {
-                return 30;
-            }
-            return size;
-        }
-    }
+			if(v instanceof Graph) {
+				return 30;
+			}
+			return size;
+		}
+	}
+
+	private static class PrintWorker extends SwingWorker<Boolean, Integer> {
+
+		private final JTable table;
+
+		public PrintWorker(final JTable table) {
+			this.table = table;
+		}
+
+		@Override
+		protected Boolean doInBackground() throws Exception {
+			try {
+				table.print();
+			} catch (PrinterException e) {
+				e.printStackTrace();
+			}
+			return true;
+		}
+
+	}
+	
 }

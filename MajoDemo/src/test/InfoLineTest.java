@@ -1,8 +1,8 @@
 package test;
 
-import graphics.InfoLine;
-
 import org.junit.Test;
+
+import graphics.InfoLine;
 
 /**
  * Prüft die Klasse InfoLine.
@@ -15,7 +15,7 @@ public class InfoLineTest {
 	@Test
 	public void testUser() {
 		final String line = "USER[sy]	1";
-		final InfoLine il = new InfoLine(line);
+		final InfoLine il = new InfoLine(line, null);
 		System.out.println(il.getUser());
 		System.out.println(il.getCount());
 	}
@@ -23,7 +23,7 @@ public class InfoLineTest {
 	@Test
 	public void testPrg() {
 		final String line = "VALUE[GH~1. 11 Falschbestellung des Kunden]	5711";
-		final InfoLine il = new InfoLine(line);
+		final InfoLine il = new InfoLine(line, null);
 		System.out.println(il.getProgram());
 		System.out.println(il.getMenu());
 		System.out.println(il.getCount());

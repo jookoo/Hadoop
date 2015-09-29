@@ -1,8 +1,5 @@
 package graphics;
 
-import graphics.InformationCreator.Edge;
-import graphics.InformationCreator.Menu;
-
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
@@ -12,6 +9,9 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
+
+import graphics.InformationCreator.Edge;
+import graphics.InformationCreator.Menu;
 
 /**
  * Repräsentiert eine Zeile in der user_session.txt.
@@ -174,6 +174,14 @@ public class SessionLine {
 		}
 	}
 
+	/**
+	 * Liefert den Benutzer der Session
+	 * @return
+	 */
+	public String getUser() {
+		return user;
+	}
+	
 	/**
 	 * Liefert die Menüpunkte der Session.
 	 * @return ein Objekt, niemals <code>null</code>

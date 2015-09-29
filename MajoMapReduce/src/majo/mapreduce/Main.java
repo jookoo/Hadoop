@@ -46,8 +46,10 @@ public class Main {
 		// Konfiguration
 		final JobConf conf = new JobConf();
 //		conf.set(MENULOG_FILTER_USERNAME, "10");
-		conf.setStrings(MENULOG_FILTER_MENUE,"9. Listen");
-		conf.setInt(MENULOG_SECONDS_MAX, 10);
+//		conf.setStrings(MENULOG_FILTER_MENUE,"9. Listen");
+//		conf.setStrings(MENULOG_FILTER_MENUE,"Q. Nur f\u00FCr 18");
+		conf.setStrings(MENULOG_FILTER_MENUE,"A. Etiketten / Schilder / Belege");
+		conf.setInt(MENULOG_SECONDS_MAX, 600);
 		int code = 0;
 
 		// Aktiviert die Komprimierung der Ergebnis-Datei

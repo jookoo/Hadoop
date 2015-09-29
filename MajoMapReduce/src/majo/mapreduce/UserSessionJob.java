@@ -1,6 +1,7 @@
 package majo.mapreduce;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Map;
@@ -157,7 +158,7 @@ public class UserSessionJob {
 		/** die Startseiten */
 		public static final Set<String> STARTPAGES = new HashSet<>();	
 		static {
-			STARTPAGES.add("1. Aufträge");
+			STARTPAGES.add("1. Auftr\u00e4ge");
 			STARTPAGES.add("2. Auskunft");
 			STARTPAGES.add("3. Rechnungen");
 			STARTPAGES.add("4. Bestellungen");
@@ -176,23 +177,15 @@ public class UserSessionJob {
 			STARTPAGES.add("K. Artikelnummern der Kunden");
 			STARTPAGES.add("L. Ware abholen (sofort Rechnung)");
 			STARTPAGES.add("M. Fremdbelege erfassen");
-			STARTPAGES.add("N. Zusätzliche Pack-Nummern drucken");
+			STARTPAGES.add("N. Zus\u00e4tzliche Pack-Nummern drucken");
 			STARTPAGES.add("O. Tourenplanung");
 			STARTPAGES.add("P. Empfangsscheine Scannen");
-			STARTPAGES.add("Q. Nur für 18");
+			STARTPAGES.add("Q. Nur f\u00FCr 18");
 			STARTPAGES.add("R. Belegerfassung");
 			STARTPAGES.add("S. Anfragen");
-			STARTPAGES.add("U. Vorgänge");
+			STARTPAGES.add("U. Vorg\u00e4nge");
 			STARTPAGES.add("V. Fremprogramme");
 			STARTPAGES.add("W. Nachlieferung");
-		}
-		
-		/** die reduzierten Startseiten */
-		public static final Set<String> STARTPAGES_REDUCED = new HashSet<>();	
-		static {
-			STARTPAGES_REDUCED.add("9. Listen");
-//			STARTPAGES_REDUCED.add("A. Etiketten / Schilder / Belege");
-//			STARTPAGES_REDUCED.add("Q. Nur für 18");
 		}
 		
 		/** die Abschlussseiten */
@@ -275,11 +268,11 @@ public class UserSessionJob {
 				}
 				count++;
 			}			
-			
+			final ArrayList<String> filterMenue = (ArrayList<String>) conf.getStringCollection(Main.MENULOG_FILTER_MENUE);
 			// Sitzungen veröffentlichen 
 			for (final UserSession x: sessions) {
 				final String firstMenue = x.getMenues().get(x.getFirstTime());
-				if (STARTPAGES_REDUCED.contains(firstMenue)) {
+				if (filterMenue.contains(firstMenue)) {
 					context.write(key, x);
 					monitor.println("\t\t\tpublish: " + x.getFirstTime() + " --> " + x.getMenues().size());
 				}

@@ -1,5 +1,6 @@
 package graphics;
 
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -31,6 +32,7 @@ public class InfoLine {
 	/** das Menü */
 	private String menu = null;
 	
+	private Map<String,String> map;
 	
 	/**
 	 * ein Konstruktor.
@@ -39,8 +41,9 @@ public class InfoLine {
 	 * VALUE[GH~1. 11 Falschbestellung des Kunden]	5711
 	 * @param line die Zeile
 	 */
-	public InfoLine(final String line) {
+	public InfoLine(final String line, final Map<String,String> translation) {
 		Objects.requireNonNull(line);
+		this.map = translation;
 		final String[] value = readLine(line);
 		if (userline) {
 			user = value[0];
@@ -121,11 +124,10 @@ public class InfoLine {
 
 	/**
 	 * Liefert den übersetzten Namen des Mitarbeiters
-	 * TODO nocht nicht implementiert.
 	 * @return ein Objekt, niemals <code>null</code>
 	 */
-	public String tranlatedName() {
-		return "";
+	public String translatedName() {
+		return map.get(user);
 	}
 	
 }

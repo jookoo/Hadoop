@@ -4,6 +4,9 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -29,7 +32,7 @@ public class InformationCreator {
 
 	/** die kumulierten Kanten */
 	private final Set<Edge> weightedEdges = new LinkedHashSet<>();
-
+	
 	/**
 	 * ein Konstruktor
 	 */
@@ -152,6 +155,7 @@ public class InformationCreator {
 	public Set<Menu> createSessionMenues(final Set<SessionLine> sessions) {
 		final Set<Menu> x = new LinkedHashSet<>();
 		for(final SessionLine sl: sessions) {
+			final String user = sl.getUser();
 			final Set<Menu> menues = sl.getMenu();
 			for (final Menu tmp: menues) {
 				if (!x.contains(tmp)) {
@@ -159,7 +163,7 @@ public class InformationCreator {
 				}
 				addweight:for (final Menu m: x) {
 					if (m.equals(tmp)) {
-						m.addWeight();
+						m.addWeight(user);
 						break addweight;
 					}
 				}
@@ -185,7 +189,7 @@ public class InformationCreator {
 			String line = null;
 			line = br.readLine();
 			einlesen: while (line != null) {
-				final InfoLine il = new InfoLine(line);
+				final InfoLine il = new InfoLine(line, GrafikApplet.USER_TRANSLATION);
 				x.add(il);
 				line = br.readLine();
 			}
@@ -237,15 +241,18 @@ public class InformationCreator {
 	 */
 	public static class Menu implements Comparable<Menu>{
 
+		/** die Topnutzer des Menüpunkts */
+		private final Map<String, Integer> topUser = new HashMap<>();
+
 		/** der Name */
 		private final String name;
-		
+
 		/** der Elternknoten */
 		private final String parentNode;
-		
+
 		/** die prozentuale Göße */
 		private float size = 1;
-		
+
 		/** die absolute Größe */
 		private int weight = 0; 
 
@@ -270,8 +277,22 @@ public class InformationCreator {
 		/**
 		 * Fügt dem Knoten-Gewichtszähler 1 hinzu.
 		 */
-		public void addWeight() {
+		public void addWeight(final String user) {
 			weight++;
+			final Integer i = topUser.get(user);
+			if(null == i) {
+				topUser.put(user, 0);
+			}
+			topUser.put(user, topUser.get(user) + 1);
+		}
+
+		/**
+		 * Zeigt die Topuser des Menüpunkts
+		 * @return
+		 */
+		public Map<String,Integer> getTopUser() {
+			final Map<String, Integer> sortedMap = MapUtil.sortByValue(topUser, true);
+			return sortedMap;
 		}
 
 		/**
@@ -281,7 +302,7 @@ public class InformationCreator {
 		public String getName() {
 			return name;
 		}
-		
+
 		/**
 		 * Setzt die aktuelle prozentuale Größe.
 		 * @param size eine Größe
@@ -327,7 +348,7 @@ public class InformationCreator {
 		public String toString() {
 			return name+(null == parentNode ? "":" "+ parentNode);
 		}
-		
+
 		@Override
 		public int hashCode() {
 			final int prime = 1013;
@@ -554,6 +575,24 @@ public class InformationCreator {
 				x = BIG;
 			}
 			return x;
+		}
+	}
+
+	private static class MapUtil {
+		public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue( Map<K, V> map , final boolean invert) {
+			List<Map.Entry<K, V>> list =
+					new LinkedList<Map.Entry<K, V>>( map.entrySet() );
+			Collections.sort( list, new Comparator<Map.Entry<K, V>>() {
+				public int compare( Map.Entry<K, V> o1, Map.Entry<K, V> o2 ) {
+					return (invert? -1:1)*(o1.getValue()).compareTo( o2.getValue() );
+				}
+			} );
+
+			Map<K, V> result = new LinkedHashMap<K, V>();
+			for (Map.Entry<K, V> entry : list) {
+				result.put( entry.getKey(), entry.getValue() );
+			}
+			return result;
 		}
 	}
 }

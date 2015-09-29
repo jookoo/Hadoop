@@ -2,6 +2,7 @@ package majo.mapreduce;
 
 import static org.junit.Assert.assertEquals;
 
+import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -42,8 +43,8 @@ public class MenulogLineTest {
 	/** eine Testzeile */
 	private static final String LINE8 = "20150214;09:02:22;21;;;4. E-Mail-Bestellung (Anja.Luesebrink@ampri.de);ABC->DEF";
 	
-	/** eine Testzeile */
-	private static final String LINE9 = "20150214;09:02:22;21;;;Q. Nur f\u00FCr 18;ABC->DEF";
+	/** eine Testzeile Q. Nur f\u00FCr 18 */
+	private static final String LINE9 = new String("20150214;09:02:22;21;;;Q. Nur für 18;ABC->DEF".getBytes(Charset.forName("UTF-8")),Charset.forName("CP850"));
 
 	/** verschiedene Testzeilen mit dem dazugehörigen Ergebnis */
 	final static String[][] CMD_REP = new String[][] {
@@ -145,11 +146,12 @@ public class MenulogLineTest {
 			System.out.println(x2);
 			assertEquals("1. Fax-Bestellung", x2.getCleanValue());
 		}
+	
 	@Test
 	public void testCleanupValueSonderzeichen() {
 		final MenulogLine x1 = new MenulogLine(LINE9);
 		System.out.println(x1);
-		assertEquals("Q. Nur fuer 18", x1.getCleanValue());
+		assertEquals("Q. Nur f\u00FCr 18", x1.getCleanValue());
 //		
 //		final MenulogLine x2 = new MenulogLine(LINE7B);
 //		System.out.println(x2);

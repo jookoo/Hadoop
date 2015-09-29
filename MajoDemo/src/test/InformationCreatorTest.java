@@ -1,10 +1,7 @@
 package test;
 
-import static org.junit.Assert.*;
-import graphics.InformationCreator;
-import graphics.InformationCreator.Edge;
-import graphics.InformationCreator.Menu;
-import graphics.SessionLine;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -13,6 +10,11 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.junit.Test;
+
+import graphics.InformationCreator;
+import graphics.InformationCreator.Edge;
+import graphics.InformationCreator.Menu;
+import graphics.SessionLine;
 
 /**
  * Prüft die Klasse {@link InformationCreator}
@@ -58,6 +60,11 @@ public class InformationCreatorTest {
 		treeset.add(m1);
 		treeset.add(m2);
 		assertTrue(2 == treeset.size());
+	}
+	
+	@Test
+	public void testUebersetzungLesen() {
+		final InformationCreator creator = new InformationCreator();
 	}
 	
 	private Set<SessionLine> createSessionlines() {
