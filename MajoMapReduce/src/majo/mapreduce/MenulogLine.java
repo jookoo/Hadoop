@@ -1,6 +1,5 @@
 package majo.mapreduce;
 
-import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -104,8 +103,7 @@ public class MenulogLine {
 	 */
 	public MenulogLine(final String l) {
 		Objects.requireNonNull(l);
-		final String line = new String(l.getBytes(Charset.forName("CP850")), Charset.forName("UTF-8"));
-		final String[] tokens = line.split(";");
+		final String[] tokens = l.split(";");
 		if (tokens.length != INDEX_MAX) {
 			throw new IllegalArgumentException("[tokens.length] != "
 					+ INDEX_MAX);

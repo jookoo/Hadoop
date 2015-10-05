@@ -1,6 +1,10 @@
 package majo.mapreduce;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -21,6 +25,8 @@ import majo.mapreduce.InputInfoJob.IntSumReducer;
 import majo.mapreduce.InputInfoJob.TokenizerMapper;
 import majo.mapreduce.UserSessionJob.SessionReducer;
 import majo.mapreduce.UserSessionJob.UserValueMapper;
+import majo.mapreduce.UserSessionJobKumuliert.SessionKumuliertReducer;
+import majo.mapreduce.UserSessionJobKumuliert.UserValueKumuliertMapper;
 
 /**
  * Konfiguration und Starter für die gesamte Datenvorbereitung durch MapReduce.
@@ -46,10 +52,8 @@ public class Main {
 		// Konfiguration
 		final JobConf conf = new JobConf();
 //		conf.set(MENULOG_FILTER_USERNAME, "10");
-//		conf.setStrings(MENULOG_FILTER_MENUE,"9. Listen");
-//		conf.setStrings(MENULOG_FILTER_MENUE,"Q. Nur f\u00FCr 18");
-		conf.setStrings(MENULOG_FILTER_MENUE,"A. Etiketten / Schilder / Belege");
-		conf.setInt(MENULOG_SECONDS_MAX, 600);
+		conf.set(MENULOG_FILTER_MENUE,"majo.mapreduce.Main$FilterKuhDreiArena");
+		conf.setInt(MENULOG_SECONDS_MAX, 60);
 		int code = 0;
 
 		// Aktiviert die Komprimierung der Ergebnis-Datei
@@ -62,12 +66,16 @@ public class Main {
 //		code += (sequenceJob.waitForCompletion(true) ? 0 : 1);
 
 		// Job 2 anlegen/ausführen
-		final Job inputInfoJob = createInputInfoJob(conf);
-		code += (inputInfoJob.waitForCompletion(true) ? 0 : 1);
+//		final Job inputInfoJob = createInputInfoJob(conf);
+//		code += (inputInfoJob.waitForCompletion(true) ? 0 : 1);
 
 		// Job 3 anlegen/ausführen
-		final Job userSessionJob = createUserSessionJob(conf);
-		code += (userSessionJob.waitForCompletion(true) ? 0 : 1);
+//		final Job userSessionJob = createUserSessionJob(conf);
+//		code += (userSessionJob.waitForCompletion(true) ? 0 : 1);
+		
+		// kumilierte Sessions
+		final Job userSessionJobKomuliert = createUserSessionJobKumuliert(conf);
+		code += (userSessionJobKomuliert.waitForCompletion(true) ? 0 : 1);
 		
 		// Job 3 anlegen/ausführen
 //		final Job sessionOverviewJob = createSessionOverviewJob(conf);
@@ -155,7 +163,7 @@ public class Main {
 	 * @return ein Objekt niemals <code>null</code>
 	 * @throws IOException bei Problemen
 	 */
-	private static Job createUserSessionJob(
+	private static Job createUserSessionJobKumuliert(
 			final Configuration conf) throws IOException {
 		final Job job = Job.getInstance(conf, 
 				UserSessionJob.class.getSimpleName());
@@ -169,11 +177,11 @@ public class Main {
 		job.setMapOutputValueClass(UserSession.class);
 
 		// Mappper + Combiner
-		job.setMapperClass(UserValueMapper.class);
-		job.setCombinerClass(SessionReducer.class);
+		job.setMapperClass(UserValueKumuliertMapper.class);
+		job.setCombinerClass(SessionKumuliertReducer.class);
 
 		// Reducer
-		job.setReducerClass(SessionReducer.class);
+		job.setReducerClass(SessionKumuliertReducer.class);
 
 		// Output
 		job.setOutputKeyClass(Text.class);
@@ -182,6 +190,44 @@ public class Main {
 		// Output-Pfad
 		FileOutputFormat.setOutputPath(job, new Path("/user_session"));
 
+		return job;
+	}
+	
+	
+	/**
+	 * Erzeugt und konfiguriert den Job um mit UserSessionJob die 
+	 * Daten zu verarbeiten
+	 * @param conf eine Konfiguration
+	 * @return ein Objekt niemals <code>null</code>
+	 * @throws IOException bei Problemen
+	 */
+	private static Job createUserSessionJob(
+			final Configuration conf) throws IOException {
+		final Job job = Job.getInstance(conf, 
+				UserSessionJob.class.getSimpleName());
+		job.setJarByClass(UserSessionJob.class);
+		
+		//Input-Pfad
+		FileInputFormat.addInputPath(job, new Path("/input/*.CSV"));
+		
+		// Mapper-Output
+		job.setMapOutputKeyClass(Text.class);
+		job.setMapOutputValueClass(UserSession.class);
+		
+		// Mappper + Combiner
+		job.setMapperClass(UserValueMapper.class);
+		job.setCombinerClass(SessionReducer.class);
+		
+		// Reducer
+		job.setReducerClass(SessionReducer.class);
+		
+		// Output
+		job.setOutputKeyClass(Text.class);
+		job.setOutputValueClass(UserSession.class);
+		
+		// Output-Pfad
+		FileOutputFormat.setOutputPath(job, new Path("/user_session"));
+		
 		return job;
 	}
 	
@@ -214,4 +260,127 @@ public class Main {
 		return job;
 	}
 
+	
+	public static class FilterMenuNeunListen implements IMenuFilter {
+		
+		public static final Set<String> OWN_STARTPAGES = new HashSet<>();	
+		static {
+			OWN_STARTPAGES.add("9. Listen");
+		}
+		
+		/** die Abschlussseiten */
+		private static final Set<String> LAYERTWO = new HashSet<>();	
+		static {
+			LAYERTWO.add("1. Lagerplatz- , Preis-Etiketten");
+			LAYERTWO.add("2. Reserveplatz-Etiketten (Herma4609)");
+			LAYERTWO.add("3. Reserveplatz-Schilder DIN A4");
+			LAYERTWO.add("4. Pendelhefter Etiketten");
+			LAYERTWO.add("5. Beschriftungsschilder Vertic");
+			LAYERTWO.add("6. Produktionsauftrags-Etiketten");
+			LAYERTWO.add("7. Etiketten für Stempelaufträge");
+			LAYERTWO.add("8. Etiketten für Kontonummernkarten");
+			LAYERTWO.add("9. Adress-Etiketten mit Kostenstelle");
+			LAYERTWO.add("A. Adress-Etiketten");
+			LAYERTWO.add("B. Sonstige");
+			LAYERTWO.add("C. Ablage Lieferanten");
+			LAYERTWO.add("D. Kommissionieretiketten");
+			LAYERTWO.add("E. Schmidtbank-Formulare");
+		}
+		
+		/** die Abschlussseiten */
+		private static final Set<String> ENDPAGES = new HashSet<>();	
+		static {
+			ENDPAGES.add("Z. Programm beenden");
+		}
+		
+		/**
+		 * Liste mit erwarteten Menüpunkten,
+		 */
+		public static final List<Set<String>> LIST = new LinkedList<>();
+		
+		static {
+			LIST.add(OWN_STARTPAGES);
+			LIST.add(LAYERTWO);
+		}
+		
+		public FilterMenuNeunListen() {
+		}
+
+		@Override
+		public Set<String> getFilterLevel(int level) {
+			return LIST.get(level);
+		}
+
+		@Override
+		public Set<String> getEndpages() {
+			return ENDPAGES;
+		}
+
+		@Override
+		public boolean isRegexMode() {
+			return false;
+		}
+	}
+	
+	public static class FilterKuhDreiArena implements IMenuFilter {
+		
+		public static final Set<String> OWN_STARTPAGES = new HashSet<>();	
+		static {
+			OWN_STARTPAGES.add("Q\\. Nur f.+r 18");
+		}
+		
+		/** die Abschlussseiten */
+		private static final Set<String> LAYERTWO = new HashSet<>();	
+		static {
+			LAYERTWO.add("3. Listen");
+		}
+		
+		/** die Abschlussseiten */
+		private static final Set<String> ENDPAGES = new HashSet<>();	
+		static {
+			ENDPAGES.add("Z. Programm beenden");
+		}
+		
+		/**
+		 * Liste mit erwarteten Menüpunkten,
+		 */
+		public static final List<Set<String>> LIST = new LinkedList<>();
+		
+		static {
+			LIST.add(OWN_STARTPAGES);
+			LIST.add(LAYERTWO);
+		}
+		
+		public FilterKuhDreiArena() {
+		}
+		
+		@Override
+		public Set<String> getFilterLevel(int level) {
+			return LIST.get(level);
+		}
+		
+		@Override
+		public Set<String> getEndpages() {
+			return ENDPAGES;
+		}
+
+		@Override
+		public boolean isRegexMode() {
+			return true;
+		}
+	}
+	
+	interface IMenuFilter {
+		
+		/**
+		 * Liefert die erwarteten Menüpunkte in der übergebenden Tiefe-1.
+		 * @param level die gesuchte Tiefe
+		 * @return
+		 */
+		public abstract Set<String> getFilterLevel(int level);
+		
+		public abstract Set<String> getEndpages();
+		
+		public abstract boolean isRegexMode();
+	}
 }

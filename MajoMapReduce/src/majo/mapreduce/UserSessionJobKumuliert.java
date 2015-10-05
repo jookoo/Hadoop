@@ -16,6 +16,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 
 import majo.mapreduce.Main.IMenuFilter;
+import majo.mapreduce.UserSessionJob.UserValueMapper;
 
 /**
  * MapReduce-Job zur Analyse der Benutzersitzungen.
@@ -23,7 +24,7 @@ import majo.mapreduce.Main.IMenuFilter;
  * @author joshua.kornfeld@bur-kg.de
  *
  */
-public class UserSessionJob {
+public class UserSessionJobKumuliert {
 
 	/**
 	 * Beschreibung für verschiedene Zähler im Job.
@@ -44,7 +45,7 @@ public class UserSessionJob {
 	 * ist ein Objekt {@link UserSession}. Letzteres nimmt den Benutzernamen 
 	 * (zusätzlich zum Schlüssel), den Zeitpunkt und den Menüpunkt auf.
 	 */
-	public static class UserValueMapper extends Mapper<Object, Text, Text, UserSession> {
+	public static class UserValueKumuliertMapper extends Mapper<Object, Text, Text, UserSession> {
 
 		//		/** der Programmfilter */
 		//		public static final String FILTER_PRG = 
@@ -139,7 +140,7 @@ public class UserSessionJob {
 	/**
 	 * Reduziert die vom {@link UserValueMapper} gesammelten Werte pro Benutzer.
 	 */
-	public static class SessionReducer extends Reducer<Text, UserSession, Text, UserSession> {
+	public static class SessionKumuliertReducer extends Reducer<Text, UserSession, Text, UserSession> {
 
 		/** eine Ausgabe zur Fehlersuche */
 		private final Monitor monitor = new Monitor(false);

@@ -13,6 +13,18 @@ import org.junit.Test;
  */
 public class UserSessionJobTest {
 
+	/** Konstante für Benutzerfilter-Schlüssel */
+	public static final String MENULOG_FILTER_USERNAME = "menulog.filter.username";
+
+	/** Konstante für Wartezeit-In-Minuten-Schlüssel */
+	public static final String MENULOG_MINUTES_MAX = "menulog.minutes.max";
+	
+	/** Konstante für Wartezeit-In-Minuten-Schlüssel */
+	public static final String MENULOG_SECONDS_MAX = "menulog.seconds.max";
+
+	/** Konstante für Menuefilter-Schlüssel */
+	public static final String MENULOG_FILTER_MENUE = "menulog.filter.menu";
+	
 	@Test
 	public void testFilterPrg() {
 		final Object[][] data = new Object[][] {

@@ -48,9 +48,15 @@ public class InformationCreator {
 			final Set<SessionLine> sessions = createSessionLines(filename);
 			calculateEdgeweight(sessions);
 			calculateSizes(sessions);
+			createInfoLine(sessions);
 		} else {
 			infos.addAll(createInfoLines(filename));
 		}
+	}
+
+	private void createInfoLine(Set<SessionLine> sessions) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	/**
@@ -223,9 +229,9 @@ public class InformationCreator {
 				x.add(sl);
 				line = br.readLine();
 				// begrenzt die eingelesen Zeilen
-				if(count > 10000) {
-					break einlesen;
-				}
+//				if(count > 100000) {
+//					break einlesen;
+//				}
 				count++;
 			}
 			fr.close();

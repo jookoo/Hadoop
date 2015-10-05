@@ -728,7 +728,8 @@ public class GrafikApplet extends JApplet {
 			setIcon(null);
 			setBorder(noFocusBorder);
 			setToolTipText((String) value);
-			setValue(truncate((String)value,10));
+//			setValue(truncate((String)value,10));
+			setValue((String)value);
 			return this;
 		}
 

@@ -1,7 +1,7 @@
 package majo.mapreduce;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
@@ -9,6 +9,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 
+import majo.mapreduce.Main.IMenuFilter;
 import majo.mapreduce.UserSessionJob.COUNTER;
 
 /**
@@ -54,24 +55,33 @@ public class InputInfoJob {
 				final Object key, final Text value, final Context context) 
 						throws IOException, InterruptedException {
 			final Configuration conf = context.getConfiguration();
-			final ArrayList<String> filterMenue = (ArrayList<String>) conf.getStringCollection(Main.MENULOG_FILTER_MENUE);
-			final MenulogLine line = new MenulogLine(value.toString());
-			final String prg = line.getCleanProgram();
-			final String user = line.getCleanUser();
-			final String menue = line.getCleanValue();
-			if (acceptProgram(prg)) {
-				if (acceptMenu(menue, filterMenue)) {
-					// Benutzer
-					word.set("USER[" + user + "]");
-					context.write(word, one);
-					// Auswahl
-					word.set("VALUE[" + prg + "~" + menue + "]");
-					context.write(word, one);
+			final String clsString = conf.get(Main.MENULOG_FILTER_MENUE);
+			Object clss;
+			try {
+				clss = Class.forName(clsString).newInstance();
+				final IMenuFilter filter = (IMenuFilter) clss;
+				final Set<String> filterMenue = filter.getFilterLevel(0);
+				final Set<String> filterSecond = filter.getFilterLevel(1);
+				final MenulogLine line = new MenulogLine(value.toString());
+				final String prg = line.getCleanProgram();
+				final String user = line.getCleanUser();
+				final String menue = line.getCleanValue();
+				if (acceptProgram(prg)) {
+//					if (acceptMenu(menue, filterMenue, filterSecond)) {
+						// Benutzer
+						word.set("USER[" + user + "]");
+						context.write(word, one);
+						// Auswahl
+						word.set("VALUE[" + prg + "~" + menue + "]");
+						context.write(word, one);
+//					} else {
+//						context.getCounter(COUNTER.OTHER_MENUE_LINE).increment(1);					
+//					}
 				} else {
-					context.getCounter(COUNTER.OTHER_MENUE_LINE).increment(1);					
+					context.getCounter(COUNTER.OTHER_PROGRAM_LINE).increment(1);					
 				}
-			} else {
-				context.getCounter(COUNTER.OTHER_PROGRAM_LINE).increment(1);					
+			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+				ex.printStackTrace();
 			}
 		}
 		
@@ -115,11 +125,15 @@ public class InputInfoJob {
 		 * @param filterUser der gesuchte Benutzer
 		 * @return <code>true</code> wenn gesucht
 		 */
-		public boolean acceptMenu(final String menu, final ArrayList<String> filterMenue) {
+		public boolean acceptMenu(final String menu, final Set<String> filterMenue, final Set<String> filterSecond) {
 			boolean match = false;
 			if (null != filterMenue) {
 				if (null != menu && null != filterMenue) {
-					match = filterMenue.contains(menu);
+					if (null != filterSecond) {
+						match = filterMenue.contains(menu);
+					} else {
+						match = filterMenue.contains(menu) || filterSecond.contains(menu);
+					}
 				}
 			} else {
 				match = true;

@@ -72,7 +72,7 @@ public class UserSession implements Writable, WritableComparable<UserSession> {
 	public long getFirstTime() {
 		return menues.firstKey().longValue();
 	}
-
+	
 	/**
 	 * Liefert den letzten Zeitpunkt der Sitzung.
 	 * @return eine Zahl
